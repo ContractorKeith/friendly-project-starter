@@ -11,11 +11,6 @@ import { MessageSquare, AlertTriangle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 
-interface User {
-  id: string;
-  email: string;
-}
-
 interface Issue {
   id: number;
   title: string;
@@ -33,16 +28,6 @@ export const IDSManager = ({ meetingId }: { meetingId?: number }) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<"high" | "medium" | "low">("medium");
-
-  // Fetch users for the owner dropdown
-  const { data: users } = useQuery({
-    queryKey: ["users"],
-    queryFn: async () => {
-      const { data, error } = await supabase.auth.admin.listUsers();
-      if (error) throw error;
-      return data.users as User[];
-    },
-  });
 
   // Fetch issues
   const { data: issues, isLoading } = useQuery({
