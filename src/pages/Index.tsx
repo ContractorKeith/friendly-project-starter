@@ -9,7 +9,10 @@ import { Headlines } from "@/components/Headlines";
 import { TodoList } from "@/components/TodoList";
 import { IDSSection } from "@/components/IDSSection";
 import { MeetingConclusion } from "@/components/MeetingConclusion";
-import { Clock, Users, Target, Newspaper, CheckSquare, MessageSquare, Flag } from "lucide-react";
+import { TodoDashboard } from "@/components/individual/TodoDashboard";
+import { RocksDashboard } from "@/components/individual/RocksDashboard";
+import { ScorecardDashboard } from "@/components/individual/ScorecardDashboard";
+import { IssuesDashboard } from "@/components/individual/IssuesDashboard";
 import { useState } from "react";
 
 const Index = () => {
@@ -32,33 +35,24 @@ const Index = () => {
           </CardContent>
         </Card>
 
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <div className="lg:col-span-3">
+        <div className="grid gap-6 md:grid-cols-2">
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold">Meeting Dashboard</h2>
             <SegueInput />
-          </div>
-
-          <div className="lg:col-span-3">
             <ScorecardReview />
-          </div>
-
-          <div className="lg:col-span-3">
             <RockReview />
-          </div>
-
-          <div className="lg:col-span-3">
             <Headlines />
-          </div>
-
-          <div className="lg:col-span-3">
             <TodoList />
-          </div>
-
-          <div className="lg:col-span-3">
             <IDSSection />
+            <MeetingConclusion />
           </div>
 
-          <div className="lg:col-span-3">
-            <MeetingConclusion />
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold">Individual Dashboard</h2>
+            <TodoDashboard />
+            <RocksDashboard />
+            <ScorecardDashboard />
+            <IssuesDashboard />
           </div>
         </div>
       </div>
