@@ -11,17 +11,12 @@ import { MessageSquare, AlertTriangle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 
-interface Issue {
-  id: number;
-  title: string;
-  description: string;
-  priority: "high" | "medium" | "low";
-  owner_id: string;
-  status: boolean;
-  meeting_id: number | null;
+interface IDSManagerProps {
+  meetingId?: number;
+  onConvertToTodo?: (issueId: number, title: string) => void;
 }
 
-export const IDSManager = ({ meetingId }: { meetingId?: number }) => {
+export const IDSManager = ({ meetingId, onConvertToTodo }: IDSManagerProps) => {
   const session = useSession();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -102,10 +97,6 @@ export const IDSManager = ({ meetingId }: { meetingId?: number }) => {
     });
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -153,12 +144,23 @@ export const IDSManager = ({ meetingId }: { meetingId?: number }) => {
                   </div>
                   <p className="text-sm text-muted-foreground">{issue.description}</p>
                 </div>
-                <Switch
-                  checked={issue.status}
-                  onCheckedChange={(checked) =>
-                    updateIssueStatus.mutate({ id: issue.id, status: checked })
-                  }
-                />
+                <div className="flex items-center gap-2">
+                  {onConvertToTodo && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onConvertToTodo(issue.id, issue.title)}
+                    >
+                      Convert to Todo
+                    </Button>
+                  )}
+                  <Switch
+                    checked={issue.status}
+                    onCheckedChange={(checked) =>
+                      updateIssueStatus.mutate({ id: issue.id, status: checked })
+                    }
+                  />
+                </div>
               </div>
             ))}
           </div>

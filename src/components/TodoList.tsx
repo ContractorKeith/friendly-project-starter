@@ -1,8 +1,52 @@
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CheckSquare } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+import { useSession } from "@supabase/auth-helpers-react";
+import { useToast } from "@/components/ui/use-toast";
 
-export const TodoList = () => {
+interface TodoListProps {
+  onConvertToIssue?: (todoId: number, title: string) => void;
+}
+
+export const TodoList = ({ onConvertToIssue }: TodoListProps) => {
+  const session = useSession();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  const { data: todos } = useQuery({
+    queryKey: ["todos"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("todos")
+        .select("*")
+        .order("created_at", { ascending: false });
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const updateTodo = useMutation({
+    mutationFn: async ({ id, status }: { id: number; status: string }) => {
+      const { error } = await supabase
+        .from("todos")
+        .update({ status })
+        .eq("id", id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["todos"] });
+      toast({
+        title: "Success",
+        description: "Todo updated successfully",
+      });
+    },
+  });
+
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -11,18 +55,32 @@ export const TodoList = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <div className="flex items-center space-x-2">
-            <Checkbox id="todo1" />
-            <label htmlFor="todo1">Update project timeline</label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox id="todo2" />
-            <label htmlFor="todo2">Schedule client meeting</label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Checkbox id="todo3" />
-            <label htmlFor="todo3">Review quarterly goals</label>
-          </div>
+          {todos?.map((todo) => (
+            <div key={todo.id} className="flex items-center justify-between space-x-2">
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id={`todo-${todo.id}`}
+                  checked={todo.status === "complete"}
+                  onCheckedChange={(checked) =>
+                    updateTodo.mutate({
+                      id: todo.id,
+                      status: checked ? "complete" : "not_started",
+                    })
+                  }
+                />
+                <label htmlFor={`todo-${todo.id}`}>{todo.title}</label>
+              </div>
+              {onConvertToIssue && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onConvertToIssue(todo.id, todo.title)}
+                >
+                  Convert to Issue
+                </Button>
+              )}
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>
