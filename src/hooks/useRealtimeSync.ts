@@ -14,6 +14,7 @@ export const useRealtimeSync = () => {
       .channel('todos-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'todos' }, 
         () => {
+          queryClient.invalidateQueries({ queryKey: ['todos'] });
           queryClient.invalidateQueries({ queryKey: ['todos', userId] });
         }
       )
@@ -24,6 +25,7 @@ export const useRealtimeSync = () => {
       .channel('rocks-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'rocks' },
         () => {
+          queryClient.invalidateQueries({ queryKey: ['rocks'] });
           queryClient.invalidateQueries({ queryKey: ['rocks', userId] });
         }
       )
@@ -34,6 +36,7 @@ export const useRealtimeSync = () => {
       .channel('issues-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'issues' },
         () => {
+          queryClient.invalidateQueries({ queryKey: ['issues'] });
           queryClient.invalidateQueries({ queryKey: ['issues', userId] });
         }
       )
