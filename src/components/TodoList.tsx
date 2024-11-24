@@ -24,7 +24,7 @@ export const TodoList = ({ onConvertToIssue }: TodoListProps) => {
         .from("todos")
         .select(`
           *,
-          profiles (username)
+          profiles!todos_assigned_to_fkey (username)
         `)
         .order("created_at", { ascending: false });
       

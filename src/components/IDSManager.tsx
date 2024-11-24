@@ -45,7 +45,7 @@ export const IDSManager = ({ meetingId, onConvertToTodo }: IDSManagerProps) => {
         .from("issues")
         .select(`
           *,
-          profiles (username)
+          profiles!issues_owner_id_fkey (username)
         `)
         .order("priority", { ascending: false });
 
