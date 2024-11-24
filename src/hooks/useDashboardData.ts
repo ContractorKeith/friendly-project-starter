@@ -11,6 +11,7 @@ export interface Todo {
   dueDate: Date;
   assigned_to: string | null;
   meeting_id: number | null;
+  user_id: string | null;
 }
 
 export interface Rock {
