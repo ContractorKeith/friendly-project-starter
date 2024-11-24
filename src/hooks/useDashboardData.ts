@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
+import { useSession } from "@supabase/auth-helpers-react";
 
 // Types
 export interface Todo {
@@ -8,6 +9,8 @@ export interface Todo {
   title: string;
   status: "not_started" | "in_progress" | "complete";
   dueDate: Date;
+  assigned_to: string | null;
+  meeting_id: number | null;
 }
 
 export interface Rock {
@@ -31,49 +34,60 @@ export interface Metric {
 }
 
 // Fetch functions
-const fetchTodos = async () => {
-  const { data, error } = await supabase.from("todos").select("*");
+const fetchTodos = async (userId: string | undefined) => {
+  const { data, error } = await supabase
+    .from("todos")
+    .select("*")
+    .eq("assigned_to", userId);
   if (error) throw error;
   return data as Todo[];
 };
 
-const fetchRocks = async () => {
-  const { data, error } = await supabase.from("rocks").select("*");
+const fetchRocks = async (userId: string | undefined) => {
+  const { data, error } = await supabase
+    .from("rocks")
+    .select("*")
+    .eq("user_id", userId);
   if (error) throw error;
   return data as Rock[];
 };
 
 // Query hooks
 export const useTodos = () => {
+  const session = useSession();
   return useQuery({
-    queryKey: ["todos"],
-    queryFn: fetchTodos,
+    queryKey: ["todos", session?.user?.id],
+    queryFn: () => fetchTodos(session?.user?.id),
+    enabled: !!session?.user?.id,
   });
 };
 
 export const useRocks = () => {
+  const session = useSession();
   return useQuery({
-    queryKey: ["rocks"],
-    queryFn: fetchRocks,
+    queryKey: ["rocks", session?.user?.id],
+    queryFn: () => fetchRocks(session?.user?.id),
+    enabled: !!session?.user?.id,
   });
 };
 
 // Mutation hooks
 export const useAddTodo = () => {
   const queryClient = useQueryClient();
+  const session = useSession();
   
   return useMutation({
     mutationFn: async (todo: Omit<Todo, "id">) => {
       const { data, error } = await supabase
         .from("todos")
-        .insert([todo])
+        .insert([{ ...todo, user_id: session?.user?.id }])
         .select()
         .single();
       if (error) throw error;
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["todos"] });
+      queryClient.invalidateQueries({ queryKey: ["todos", session?.user?.id] });
       toast({
         title: "Success",
         description: "Todo added successfully",
@@ -84,19 +98,20 @@ export const useAddTodo = () => {
 
 export const useAddRock = () => {
   const queryClient = useQueryClient();
+  const session = useSession();
   
   return useMutation({
     mutationFn: async (rock: Omit<Rock, "id">) => {
       const { data, error } = await supabase
         .from("rocks")
-        .insert([rock])
+        .insert([{ ...rock, user_id: session?.user?.id }])
         .select()
         .single();
       if (error) throw error;
       return data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["rocks"] });
+      queryClient.invalidateQueries({ queryKey: ["rocks", session?.user?.id] });
       toast({
         title: "Success",
         description: "Rock added successfully",
@@ -105,29 +120,21 @@ export const useAddRock = () => {
   });
 };
 
-// Mutation hooks for updating todos and rocks
+// Update mutations
 export const useUpdateTodo = () => {
   const queryClient = useQueryClient();
+  const session = useSession();
   
   return useMutation({
     mutationFn: async (todo: Partial<Todo> & { id: number }) => {
-      try {
-        const { error } = await supabase
-          .from("todos")
-          .update(todo)
-          .eq("id", todo.id);
-        if (error) throw error;
-      } catch (error) {
-        // Store update locally if connection isn't ready
-        const currentTodos = queryClient.getQueryData<Todo[]>(["todos"]) || [];
-        const updatedTodos = currentTodos.map(t => 
-          t.id === todo.id ? { ...t, ...todo } : t
-        );
-        queryClient.setQueryData(["todos"], updatedTodos);
-      }
+      const { error } = await supabase
+        .from("todos")
+        .update(todo)
+        .eq("id", todo.id);
+      if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["todos"] });
+      queryClient.invalidateQueries({ queryKey: ["todos", session?.user?.id] });
       toast({
         title: "Success",
         description: "Todo updated successfully",
@@ -138,26 +145,18 @@ export const useUpdateTodo = () => {
 
 export const useUpdateRock = () => {
   const queryClient = useQueryClient();
+  const session = useSession();
   
   return useMutation({
     mutationFn: async (rock: Partial<Rock> & { id: number }) => {
-      try {
-        const { error } = await supabase
-          .from("rocks")
-          .update(rock)
-          .eq("id", rock.id);
-        if (error) throw error;
-      } catch (error) {
-        // Store update locally if connection isn't ready
-        const currentRocks = queryClient.getQueryData<Rock[]>(["rocks"]) || [];
-        const updatedRocks = currentRocks.map(r => 
-          r.id === rock.id ? { ...r, ...rock } : r
-        );
-        queryClient.setQueryData(["rocks"], updatedRocks);
-      }
+      const { error } = await supabase
+        .from("rocks")
+        .update(rock)
+        .eq("id", rock.id);
+      if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["rocks"] });
+      queryClient.invalidateQueries({ queryKey: ["rocks", session?.user?.id] });
       toast({
         title: "Success",
         description: "Rock updated successfully",

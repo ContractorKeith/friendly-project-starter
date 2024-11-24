@@ -39,6 +39,33 @@ export type Database = {
         }
         Relationships: []
       }
+      meetings: {
+        Row: {
+          created_at: string | null
+          id: number
+          meeting_date: string
+          status: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          meeting_date: string
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          meeting_date?: string
+          status?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       metrics: {
         Row: {
           created_at: string | null
@@ -101,33 +128,47 @@ export type Database = {
       }
       todos: {
         Row: {
+          assigned_to: string | null
           created_at: string | null
           due_date: string | null
           id: number
+          meeting_id: number | null
           status: string
           title: string
           updated_at: string | null
           user_id: string | null
         }
         Insert: {
+          assigned_to?: string | null
           created_at?: string | null
           due_date?: string | null
           id?: number
+          meeting_id?: number | null
           status?: string
           title: string
           updated_at?: string | null
           user_id?: string | null
         }
         Update: {
+          assigned_to?: string | null
           created_at?: string | null
           due_date?: string | null
           id?: number
+          meeting_id?: number | null
           status?: string
           title?: string
           updated_at?: string | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "todos_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

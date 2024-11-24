@@ -1,9 +1,12 @@
 import { useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { useSession } from '@supabase/auth-helpers-react';
 import { supabase } from '@/lib/supabase';
 
 export const useRealtimeSync = () => {
   const queryClient = useQueryClient();
+  const session = useSession();
+  const userId = session?.user?.id;
 
   useEffect(() => {
     // Subscribe to todos changes
@@ -11,7 +14,7 @@ export const useRealtimeSync = () => {
       .channel('todos-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'todos' }, 
         () => {
-          queryClient.invalidateQueries({ queryKey: ['todos'] });
+          queryClient.invalidateQueries({ queryKey: ['todos', userId] });
         }
       )
       .subscribe();
@@ -21,7 +24,7 @@ export const useRealtimeSync = () => {
       .channel('rocks-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'rocks' },
         () => {
-          queryClient.invalidateQueries({ queryKey: ['rocks'] });
+          queryClient.invalidateQueries({ queryKey: ['rocks', userId] });
         }
       )
       .subscribe();
@@ -31,7 +34,7 @@ export const useRealtimeSync = () => {
       .channel('issues-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'issues' },
         () => {
-          queryClient.invalidateQueries({ queryKey: ['issues'] });
+          queryClient.invalidateQueries({ queryKey: ['issues', userId] });
         }
       )
       .subscribe();
@@ -41,7 +44,7 @@ export const useRealtimeSync = () => {
       .channel('scorecard-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'scorecard' },
         () => {
-          queryClient.invalidateQueries({ queryKey: ['scorecard'] });
+          queryClient.invalidateQueries({ queryKey: ['scorecard', userId] });
         }
       )
       .subscribe();
@@ -52,5 +55,5 @@ export const useRealtimeSync = () => {
       issuesSubscription.unsubscribe();
       scorecardSubscription.unsubscribe();
     };
-  }, [queryClient]);
+  }, [queryClient, userId]);
 };
