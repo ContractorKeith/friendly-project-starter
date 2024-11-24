@@ -1,7 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Timer } from "@/components/Timer";
-import { MeetingSection } from "@/components/MeetingSection";
 import { SegueInput } from "@/components/SegueInput";
 import { ScorecardReview } from "@/components/ScorecardReview";
 import { RockReview } from "@/components/RockReview";
@@ -9,17 +8,21 @@ import { Headlines } from "@/components/Headlines";
 import { TodoList } from "@/components/TodoList";
 import { IDSSection } from "@/components/IDSSection";
 import { MeetingConclusion } from "@/components/MeetingConclusion";
-import { TodoDashboard } from "@/components/individual/TodoDashboard";
-import { RocksDashboard } from "@/components/individual/RocksDashboard";
-import { ScorecardDashboard } from "@/components/individual/ScorecardDashboard";
-import { IssuesDashboard } from "@/components/individual/IssuesDashboard";
 import { useRealtimeSync } from "@/hooks/useRealtimeSync";
 import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
+
+const MEETING_SEGMENTS = [
+  { name: "Segue", duration: 5 },
+  { name: "Scorecard Review", duration: 5 },
+  { name: "Rock Review", duration: 5 },
+  { name: "Headlines", duration: 5 },
+  { name: "ToDos", duration: 5 },
+  { name: "IDS", duration: 60 },
+  { name: "Conclude", duration: 5 }
+];
 
 const Index = () => {
   const [meetingProgress, setMeetingProgress] = useState(0);
-  const { toast } = useToast();
 
   // Enable real-time sync
   useRealtimeSync();
@@ -29,7 +32,11 @@ const Index = () => {
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Level 10 Meeting</h1>
-          <Timer initialMinutes={90} onProgressChange={setMeetingProgress} />
+          <Timer 
+            initialMinutes={90} 
+            onProgressChange={setMeetingProgress} 
+            segments={MEETING_SEGMENTS}
+          />
         </div>
 
         <Card>
@@ -51,14 +58,6 @@ const Index = () => {
             <TodoList />
             <IDSSection />
             <MeetingConclusion />
-          </div>
-
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold">Individual Dashboard</h2>
-            <TodoDashboard />
-            <RocksDashboard />
-            <ScorecardDashboard />
-            <IssuesDashboard />
           </div>
         </div>
       </div>
