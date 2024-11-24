@@ -21,7 +21,7 @@ interface Issue {
   owner_id: string;
   meeting_id: number | null;
   due_date?: string;
-  profiles?: { username: string };
+  profiles: { username: string };
 }
 
 interface IDSManagerProps {
@@ -45,7 +45,7 @@ export const IDSManager = ({ meetingId, onConvertToTodo }: IDSManagerProps) => {
         .from("issues")
         .select(`
           *,
-          profiles!inner(username)
+          profiles (username)
         `)
         .order("priority", { ascending: false });
 
@@ -61,7 +61,7 @@ export const IDSManager = ({ meetingId, onConvertToTodo }: IDSManagerProps) => {
 
   // Add new issue
   const addIssue = useMutation({
-    mutationFn: async (newIssue: Omit<Issue, "id">) => {
+    mutationFn: async (newIssue: Omit<Issue, "id" | "profiles">) => {
       const { data, error } = await supabase
         .from("issues")
         .insert([newIssue])
