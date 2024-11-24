@@ -10,6 +10,7 @@ import { Calendar as CalendarIcon, CheckSquare } from "lucide-react";
 import { useTodos, useUpdateTodo, useAddTodo } from "@/hooks/useDashboardData";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useRealtimeSync } from "@/hooks/useRealtimeSync";
+import { ShareDialog } from "@/components/ShareDialog";
 
 export const TodoDashboard = ({ meetingId }: { meetingId?: number }) => {
   const { data: todos, isLoading } = useTodos();
@@ -71,21 +72,24 @@ export const TodoDashboard = ({ meetingId }: { meetingId?: number }) => {
             <div key={todo.id} className="flex flex-col space-y-2 border-b pb-4">
               <div className="flex items-center justify-between">
                 <span className="font-medium">{todo.title}</span>
-                <Select 
-                  value={todo.status}
-                  onValueChange={(value: "not_started" | "in_progress" | "complete") => 
-                    handleStatusChange(todo.id, value)
-                  }
-                >
-                  <SelectTrigger className="w-[140px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="not_started">Not Started</SelectItem>
-                    <SelectItem value="in_progress">In Progress</SelectItem>
-                    <SelectItem value="complete">Complete</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex items-center gap-2">
+                  <ShareDialog itemType="todo" itemId={todo.id} />
+                  <Select 
+                    value={todo.status}
+                    onValueChange={(value: "not_started" | "in_progress" | "complete") => 
+                      handleStatusChange(todo.id, value)
+                    }
+                  >
+                    <SelectTrigger className="w-[140px]">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="not_started">Not Started</SelectItem>
+                      <SelectItem value="in_progress">In Progress</SelectItem>
+                      <SelectItem value="complete">Complete</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               <div className="flex items-center space-x-2">
                 <Popover>

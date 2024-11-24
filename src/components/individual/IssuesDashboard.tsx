@@ -9,6 +9,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 import { useRealtimeSync } from "@/hooks/useRealtimeSync";
+import { ShareDialog } from "@/components/ShareDialog";
 
 interface Issue {
   id: number;
@@ -122,15 +123,18 @@ export const IssuesDashboard = ({ meetingId }: { meetingId?: number }) => {
                     <AlertTriangle className="h-4 w-4 text-red-500" />
                   )}
                 </div>
-                <span className={`text-sm ${
-                  issue.priority === "high" 
-                    ? "text-red-500" 
-                    : issue.priority === "medium" 
-                    ? "text-yellow-500" 
-                    : "text-green-500"
-                }`}>
-                  {issue.priority.charAt(0).toUpperCase() + issue.priority.slice(1)}
-                </span>
+                <div className="flex items-center gap-2">
+                  <ShareDialog itemType="issue" itemId={issue.id} />
+                  <span className={`text-sm ${
+                    issue.priority === "high" 
+                      ? "text-red-500" 
+                      : issue.priority === "medium" 
+                      ? "text-yellow-500" 
+                      : "text-green-500"
+                  }`}>
+                    {issue.priority.charAt(0).toUpperCase() + issue.priority.slice(1)}
+                  </span>
+                </div>
               </div>
             ))}
           </div>

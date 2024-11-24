@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useRocks, useUpdateRock, useAddRock } from "@/hooks/useDashboardData";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useRealtimeSync } from "@/hooks/useRealtimeSync";
+import { ShareDialog } from "@/components/ShareDialog";
 
 export const RocksDashboard = ({ meetingId }: { meetingId?: number }) => {
   const { data: rocks, isLoading } = useRocks();
@@ -96,6 +97,7 @@ export const RocksDashboard = ({ meetingId }: { meetingId?: number }) => {
               <div className="flex items-center justify-between">
                 <span className="font-medium">{rock.title}</span>
                 <div className="flex items-center space-x-4">
+                  <ShareDialog itemType="rock" itemId={rock.id} />
                   <span className="text-sm text-muted-foreground">
                     Due: {rock.due_date ? format(new Date(rock.due_date), "PPP") : "Not set"}
                   </span>
