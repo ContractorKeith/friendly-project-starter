@@ -6,29 +6,20 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, CheckSquare } from "lucide-react";
-
-interface Todo {
-  id: number;
-  title: string;
-  status: "not_started" | "in_progress" | "complete";
-  dueDate: Date;
-}
+import { useTodos, useUpdateTodo } from "@/hooks/useDashboardData";
 
 export const TodoDashboard = () => {
-  const [todos] = useState<Todo[]>([
-    {
-      id: 1,
-      title: "Complete project proposal",
-      status: "in_progress",
-      dueDate: new Date(),
-    },
-    {
-      id: 2,
-      title: "Review quarterly goals",
-      status: "not_started",
-      dueDate: new Date(),
-    },
-  ]);
+  const { data: todos, isLoading } = useTodos();
+  const updateTodo = useUpdateTodo();
+  const [date, setDate] = useState<Date>();
+
+  const handleStatusChange = (todoId: number, status: "not_started" | "in_progress" | "complete") => {
+    updateTodo.mutate({ id: todoId, status });
+  };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <Card>
@@ -38,11 +29,16 @@ export const TodoDashboard = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {todos.map((todo) => (
+          {todos?.map((todo) => (
             <div key={todo.id} className="flex flex-col space-y-2 border-b pb-4">
               <div className="flex items-center justify-between">
                 <span className="font-medium">{todo.title}</span>
-                <Select defaultValue={todo.status}>
+                <Select 
+                  defaultValue={todo.status}
+                  onValueChange={(value: "not_started" | "in_progress" | "complete") => 
+                    handleStatusChange(todo.id, value)
+                  }
+                >
                   <SelectTrigger className="w-[140px]">
                     <SelectValue />
                   </SelectTrigger>
@@ -58,13 +54,14 @@ export const TodoDashboard = () => {
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-[140px] pl-3 text-left font-normal">
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {format(todo.dueDate, "PPP")}
+                      {todo.dueDate ? format(new Date(todo.dueDate), "PPP") : "Pick a date"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={todo.dueDate}
+                      selected={date}
+                      onSelect={setDate}
                       initialFocus
                     />
                   </PopoverContent>

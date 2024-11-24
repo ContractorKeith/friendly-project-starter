@@ -2,19 +2,19 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Progress } from "@/components/ui/progress";
 import { Diamond } from "lucide-react";
-
-interface Rock {
-  id: number;
-  title: string;
-  onTrack: boolean;
-  progress: number;
-}
+import { useRocks, useUpdateRock } from "@/hooks/useDashboardData";
 
 export const RocksDashboard = () => {
-  const rocks: Rock[] = [
-    { id: 1, title: "Market Expansion", onTrack: true, progress: 75 },
-    { id: 2, title: "Team Training", onTrack: false, progress: 30 },
-  ];
+  const { data: rocks, isLoading } = useRocks();
+  const updateRock = useUpdateRock();
+
+  const handleOnTrackChange = (rockId: number, onTrack: boolean) => {
+    updateRock.mutate({ id: rockId, onTrack });
+  };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <Card>
@@ -24,13 +24,16 @@ export const RocksDashboard = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          {rocks.map((rock) => (
+          {rocks?.map((rock) => (
             <div key={rock.id} className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="font-medium">{rock.title}</span>
                 <div className="flex items-center space-x-2">
                   <span className="text-sm text-muted-foreground">On Track</span>
-                  <Switch checked={rock.onTrack} />
+                  <Switch 
+                    checked={rock.onTrack}
+                    onCheckedChange={(checked) => handleOnTrackChange(rock.id, checked)}
+                  />
                 </div>
               </div>
               <div className="space-y-1">
