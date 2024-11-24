@@ -11,6 +11,16 @@ import { MessageSquare, AlertTriangle } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 
+interface Issue {
+  id: number;
+  title: string;
+  description?: string;
+  priority: "high" | "medium" | "low";
+  status: boolean;
+  owner_id: string;
+  meeting_id: number | null;
+}
+
 interface IDSManagerProps {
   meetingId?: number;
   onConvertToTodo?: (issueId: number, title: string) => void;
