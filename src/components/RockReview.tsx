@@ -40,7 +40,7 @@ export const RockReview = ({ meetingId }: RockReviewProps) => {
         .from("rocks")
         .select(`
           *,
-          owner:owner_id (
+          owner:profiles!rocks_owner_id_fkey (
             username
           )
         `)

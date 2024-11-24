@@ -297,6 +297,13 @@ export type Database = {
             referencedRelation: "meetings"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "rocks_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
         ]
       }
       scorecard_templates: {
