@@ -19,6 +19,10 @@ export interface Rock {
   title: string;
   onTrack: boolean;
   progress: number;
+  owner_id: string;
+  due_date: Date | null;
+  meeting_id: number | null;
+  user_id: string | null;
 }
 
 export interface Issue {

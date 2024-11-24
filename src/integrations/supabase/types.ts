@@ -99,8 +99,11 @@ export type Database = {
       rocks: {
         Row: {
           created_at: string | null
+          due_date: string | null
           id: number
+          meeting_id: number | null
           on_track: boolean | null
+          owner_id: string
           progress: number | null
           title: string
           updated_at: string | null
@@ -108,8 +111,11 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          due_date?: string | null
           id?: number
+          meeting_id?: number | null
           on_track?: boolean | null
+          owner_id: string
           progress?: number | null
           title: string
           updated_at?: string | null
@@ -117,14 +123,25 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          due_date?: string | null
           id?: number
+          meeting_id?: number | null
           on_track?: boolean | null
+          owner_id?: string
           progress?: number | null
           title?: string
           updated_at?: string | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "rocks_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       todos: {
         Row: {
