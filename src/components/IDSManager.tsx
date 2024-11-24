@@ -11,6 +11,8 @@ import { MessageSquare, AlertTriangle, Calendar } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
 import { format } from "date-fns";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 
 interface Issue {
   id: number;
@@ -36,6 +38,22 @@ export const IDSManager = ({ meetingId, onConvertToTodo }: IDSManagerProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<"high" | "medium" | "low">("medium");
+  const [dueDate, setDueDate] = useState<Date>();
+  const [assignedTo, setAssignedTo] = useState<string>("");
+
+  // Fetch users for assignment
+  const { data: users } = useQuery({
+    queryKey: ["users"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, username")
+        .eq("active", true);
+      
+      if (error) throw error;
+      return data;
+    },
+  });
 
   // Fetch issues with owner information
   const { data: issues, isLoading } = useQuery({
@@ -75,6 +93,8 @@ export const IDSManager = ({ meetingId, onConvertToTodo }: IDSManagerProps) => {
       setTitle("");
       setDescription("");
       setPriority("medium");
+      setDueDate(undefined);
+      setAssignedTo("");
       toast({
         title: "Success",
         description: "Issue added successfully",
@@ -107,9 +127,10 @@ export const IDSManager = ({ meetingId, onConvertToTodo }: IDSManagerProps) => {
       title,
       description,
       priority,
-      owner_id: session?.user?.id || "",
+      owner_id: assignedTo || session?.user?.id || "",
       status: true,
       meeting_id: meetingId || null,
+      due_date: dueDate?.toISOString(),
     });
   };
 
@@ -142,6 +163,34 @@ export const IDSManager = ({ meetingId, onConvertToTodo }: IDSManagerProps) => {
                 <SelectItem value="low">Low</SelectItem>
               </SelectContent>
             </Select>
+            <Select value={assignedTo} onValueChange={setAssignedTo}>
+              <SelectTrigger>
+                <SelectValue placeholder="Assign to..." />
+              </SelectTrigger>
+              <SelectContent>
+                {users?.map((user) => (
+                  <SelectItem key={user.id} value={user.id}>
+                    {user.username}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-full justify-start text-left font-normal">
+                  <Calendar className="mr-2 h-4 w-4" />
+                  {dueDate ? format(dueDate, 'PPP') : 'Pick a due date'}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <CalendarComponent
+                  mode="single"
+                  selected={dueDate}
+                  onSelect={setDueDate}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
             <Button onClick={handleSubmit} className="w-full">Add Issue</Button>
           </div>
 
