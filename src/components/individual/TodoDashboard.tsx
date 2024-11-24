@@ -4,14 +4,30 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, CheckSquare } from "lucide-react";
-import { useTodos, useUpdateTodo } from "@/hooks/useDashboardData";
+import { useTodos, useUpdateTodo, useAddTodo } from "@/hooks/useDashboardData";
 
 export const TodoDashboard = () => {
   const { data: todos, isLoading } = useTodos();
   const updateTodo = useUpdateTodo();
+  const addTodo = useAddTodo();
+  const [newTodoTitle, setNewTodoTitle] = useState("");
   const [date, setDate] = useState<Date>();
+
+  const handleAddTodo = () => {
+    if (!newTodoTitle.trim()) return;
+    
+    addTodo.mutate({
+      title: newTodoTitle,
+      status: "not_started",
+      dueDate: date || new Date(),
+    });
+    
+    setNewTodoTitle("");
+    setDate(undefined);
+  };
 
   const handleStatusChange = (todoId: number, status: "not_started" | "in_progress" | "complete") => {
     updateTodo.mutate({ id: todoId, status });
@@ -29,6 +45,15 @@ export const TodoDashboard = () => {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
+          <div className="flex gap-2">
+            <Input
+              placeholder="Add new todo..."
+              value={newTodoTitle}
+              onChange={(e) => setNewTodoTitle(e.target.value)}
+            />
+            <Button onClick={handleAddTodo}>Add Todo</Button>
+          </div>
+          
           {todos?.map((todo) => (
             <div key={todo.id} className="flex flex-col space-y-2 border-b pb-4">
               <div className="flex items-center justify-between">

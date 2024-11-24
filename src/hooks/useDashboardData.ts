@@ -30,60 +30,24 @@ export interface Metric {
   target: string;
 }
 
-// Mock data to use while connection is establishing
-const mockTodos: Todo[] = [
-  { id: 1, title: "Review project timeline", status: "not_started", dueDate: new Date() },
-  { id: 2, title: "Update documentation", status: "in_progress", dueDate: new Date() }
-];
-
-const mockRocks: Rock[] = [
-  { id: 1, title: "Q1 Market Expansion", onTrack: true, progress: 75 },
-  { id: 2, title: "Process Automation", onTrack: false, progress: 30 }
-];
-
-// Fetch functions with fallback to mock data
+// Fetch functions
 const fetchTodos = async () => {
-  try {
-    const { data, error } = await supabase.from("todos").select("*");
-    if (error) {
-      console.warn("Falling back to mock data for todos:", error.message);
-      return mockTodos;
-    }
-    return data as Todo[];
-  } catch (error) {
-    console.warn("Falling back to mock data for todos");
-    return mockTodos;
-  }
+  const { data, error } = await supabase.from("todos").select("*");
+  if (error) throw error;
+  return data as Todo[];
 };
 
 const fetchRocks = async () => {
-  try {
-    const { data, error } = await supabase.from("rocks").select("*");
-    if (error) {
-      console.warn("Falling back to mock data for rocks:", error.message);
-      return mockRocks;
-    }
-    return data as Rock[];
-  } catch (error) {
-    console.warn("Falling back to mock data for rocks");
-    return mockRocks;
-  }
+  const { data, error } = await supabase.from("rocks").select("*");
+  if (error) throw error;
+  return data as Rock[];
 };
 
-// Hooks
+// Query hooks
 export const useTodos = () => {
   return useQuery({
     queryKey: ["todos"],
     queryFn: fetchTodos,
-    meta: {
-      onError: (error: Error) => {
-        toast({
-          title: "Error loading todos",
-          description: "Using cached data while connection is established",
-          variant: "destructive",
-        });
-      },
-    },
   });
 };
 
@@ -91,19 +55,57 @@ export const useRocks = () => {
   return useQuery({
     queryKey: ["rocks"],
     queryFn: fetchRocks,
-    meta: {
-      onError: (error: Error) => {
-        toast({
-          title: "Error loading rocks",
-          description: "Using cached data while connection is established",
-          variant: "destructive",
-        });
-      },
-    },
   });
 };
 
 // Mutation hooks
+export const useAddTodo = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (todo: Omit<Todo, "id">) => {
+      const { data, error } = await supabase
+        .from("todos")
+        .insert([todo])
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["todos"] });
+      toast({
+        title: "Success",
+        description: "Todo added successfully",
+      });
+    },
+  });
+};
+
+export const useAddRock = () => {
+  const queryClient = useQueryClient();
+  
+  return useMutation({
+    mutationFn: async (rock: Omit<Rock, "id">) => {
+      const { data, error } = await supabase
+        .from("rocks")
+        .insert([rock])
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["rocks"] });
+      toast({
+        title: "Success",
+        description: "Rock added successfully",
+      });
+    },
+  });
+};
+
+// Mutation hooks for updating todos and rocks
 export const useUpdateTodo = () => {
   const queryClient = useQueryClient();
   
