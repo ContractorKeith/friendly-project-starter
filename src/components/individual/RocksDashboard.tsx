@@ -31,6 +31,7 @@ export const RocksDashboard = () => {
       owner_id: session?.user?.id || "",
       due_date: dueDate || new Date(),
       meeting_id: null,
+      user_id: session?.user?.id || "",
     });
     
     setNewRockTitle("");
