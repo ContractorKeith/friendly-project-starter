@@ -12,32 +12,49 @@ export type Database = {
       issues: {
         Row: {
           created_at: string | null
+          description: string | null
           id: number
+          meeting_id: number | null
+          owner_id: string | null
           priority: string
-          status: string
+          status: boolean
           title: string
           updated_at: string | null
           user_id: string | null
         }
         Insert: {
           created_at?: string | null
+          description?: string | null
           id?: number
+          meeting_id?: number | null
+          owner_id?: string | null
           priority?: string
-          status?: string
+          status?: boolean
           title: string
           updated_at?: string | null
           user_id?: string | null
         }
         Update: {
           created_at?: string | null
+          description?: string | null
           id?: number
+          meeting_id?: number | null
+          owner_id?: string | null
           priority?: string
-          status?: string
+          status?: boolean
           title?: string
           updated_at?: string | null
           user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "issues_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       meetings: {
         Row: {
