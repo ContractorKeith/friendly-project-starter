@@ -175,6 +175,30 @@ export type Database = {
         }
         Relationships: []
       }
+      org_settings: {
+        Row: {
+          created_at: string | null
+          id: number
+          setting_key: string
+          setting_value: Json
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          setting_key: string
+          setting_value: Json
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          setting_key?: string
+          setting_value?: Json
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           active: boolean | null
@@ -257,6 +281,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      scorecard_templates: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          id: number
+          metrics: Json
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: number
+          metrics: Json
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          id?: number
+          metrics?: Json
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       shared_items: {
         Row: {
