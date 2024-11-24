@@ -13,10 +13,16 @@ import { TodoDashboard } from "@/components/individual/TodoDashboard";
 import { RocksDashboard } from "@/components/individual/RocksDashboard";
 import { ScorecardDashboard } from "@/components/individual/ScorecardDashboard";
 import { IssuesDashboard } from "@/components/individual/IssuesDashboard";
+import { useRealtimeSync } from "@/hooks/useRealtimeSync";
 import { useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
 
 const Index = () => {
   const [meetingProgress, setMeetingProgress] = useState(0);
+  const { toast } = useToast();
+
+  // Enable real-time sync
+  useRealtimeSync();
 
   return (
     <div className="min-h-screen p-6 bg-gray-50">
