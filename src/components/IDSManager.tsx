@@ -21,7 +21,7 @@ interface Issue {
   owner_id: string;
   meeting_id: number | null;
   due_date?: string;
-  owner?: { username: string };
+  profiles?: { username: string };
 }
 
 interface IDSManagerProps {
@@ -45,7 +45,7 @@ export const IDSManager = ({ meetingId, onConvertToTodo }: IDSManagerProps) => {
         .from("issues")
         .select(`
           *,
-          owner:profiles!issues_owner_id_fkey(username)
+          profiles!inner(username)
         `)
         .order("priority", { ascending: false });
 
@@ -166,8 +166,8 @@ export const IDSManager = ({ meetingId, onConvertToTodo }: IDSManagerProps) => {
                         {format(new Date(issue.due_date), 'MMM d, yyyy')}
                       </div>
                     )}
-                    {issue.owner && (
-                      <span>• Owner: {issue.owner.username}</span>
+                    {issue.profiles?.username && (
+                      <span>• Owner: {issue.profiles.username}</span>
                     )}
                   </div>
                 </div>

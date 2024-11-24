@@ -24,7 +24,7 @@ export const TodoList = ({ onConvertToIssue }: TodoListProps) => {
         .from("todos")
         .select(`
           *,
-          assigned_to_profile:profiles!todos_assigned_to_fkey(username)
+          profiles!inner(username)
         `)
         .order("created_at", { ascending: false });
       
@@ -85,8 +85,8 @@ export const TodoList = ({ onConvertToIssue }: TodoListProps) => {
                         {format(new Date(todo.due_date), 'MMM d, yyyy')}
                       </div>
                     )}
-                    {todo.assigned_to_profile && (
-                      <span>• Assigned to: {todo.assigned_to_profile.username}</span>
+                    {todo.profiles?.username && (
+                      <span>• Assigned to: {todo.profiles.username}</span>
                     )}
                   </div>
                 </div>
