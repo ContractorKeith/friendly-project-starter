@@ -177,22 +177,34 @@ export type Database = {
       }
       profiles: {
         Row: {
+          active: boolean | null
           created_at: string
+          email: string | null
+          full_name: string | null
           id: string
+          last_login: string | null
           role: string
           updated_at: string
           username: string
         }
         Insert: {
+          active?: boolean | null
           created_at?: string
+          email?: string | null
+          full_name?: string | null
           id: string
+          last_login?: string | null
           role: string
           updated_at?: string
           username: string
         }
         Update: {
+          active?: boolean | null
           created_at?: string
+          email?: string | null
+          full_name?: string | null
           id?: string
+          last_login?: string | null
           role?: string
           updated_at?: string
           username?: string
@@ -295,7 +307,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      deactivate_user: {
+        Args: {
+          user_id: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
