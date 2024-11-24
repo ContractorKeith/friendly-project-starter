@@ -1,12 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Use environment variables provided by Lovable's Supabase integration
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-key';
-
-// Log a warning if env vars are missing
-if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-  console.warn('Supabase environment variables are missing. Please ensure the Supabase integration is properly connected in Lovable.');
-}
+const supabaseUrl = "https://czjpzgmlkrmcwwsmafrh.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN6anB6Z21sa3JtY3d3c21hZnJoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI0NDQ5NjMsImV4cCI6MjA0ODAyMDk2M30.4LqM8VguZDFpd00tpG4D4DW4_tU_aH4LplM6kndsQKA";
 
 export const supabase = createClient(supabaseUrl, supabaseKey);
