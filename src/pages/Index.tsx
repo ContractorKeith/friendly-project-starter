@@ -27,8 +27,8 @@ const Index = () => {
 
   return (
     <div className="container mx-auto p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <div className="flex justify-between items-center">
+      <div className="max-w-[75%] mx-auto space-y-8">
+        <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold">Level 10 Meeting</h1>
           <Timer 
             initialMinutes={90} 
@@ -37,7 +37,7 @@ const Index = () => {
           />
         </div>
 
-        <Card>
+        <Card className="w-full">
           <CardHeader>
             <CardTitle>Meeting Progress</CardTitle>
           </CardHeader>
@@ -46,16 +46,14 @@ const Index = () => {
           </CardContent>
         </Card>
 
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="space-y-6">
-            <SegueInput />
-            <ScorecardReview />
-            <RockReview />
-            <Headlines />
-            <TodoList />
-            <IDSSection />
-            <MeetingConclusion />
-          </div>
+        <div className="space-y-8">
+          <SegueInput />
+          <ScorecardReview />
+          <RockReview />
+          <Headlines />
+          <TodoList />
+          <IDSSection />
+          <MeetingConclusion />
         </div>
       </div>
     </div>
