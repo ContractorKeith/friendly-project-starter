@@ -75,6 +75,7 @@ export type Database = {
         Row: {
           created_at: string | null
           description: string | null
+          due_date: string | null
           id: number
           meeting_id: number | null
           owner_id: string | null
@@ -87,6 +88,7 @@ export type Database = {
         Insert: {
           created_at?: string | null
           description?: string | null
+          due_date?: string | null
           id?: number
           meeting_id?: number | null
           owner_id?: string | null
@@ -99,6 +101,7 @@ export type Database = {
         Update: {
           created_at?: string | null
           description?: string | null
+          due_date?: string | null
           id?: number
           meeting_id?: number | null
           owner_id?: string | null
