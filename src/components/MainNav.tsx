@@ -45,28 +45,28 @@ export function MainNav() {
         <NavigationMenu>
           <NavigationMenuList>
             <NavigationMenuItem>
-              <Link to="/" legacyBehavior passHref>
+              <Link to="/">
                 <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                   Meeting Timer
                 </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <Link to="/dashboard" legacyBehavior passHref>
+              <Link to="/dashboard">
                 <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                   Dashboard
                 </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <Link to="/todos" legacyBehavior passHref>
+              <Link to="/todos">
                 <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                   ToDos
                 </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
             <NavigationMenuItem>
-              <Link to="/rocks" legacyBehavior passHref>
+              <Link to="/rocks">
                 <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                   Rocks
                 </NavigationMenuLink>
@@ -74,7 +74,7 @@ export function MainNav() {
             </NavigationMenuItem>
             {profile?.role === "admin" && (
               <NavigationMenuItem>
-                <Link to="/admin" legacyBehavior passHref>
+                <Link to="/admin">
                   <NavigationMenuLink className={navigationMenuTriggerStyle()}>
                     Admin
                   </NavigationMenuLink>

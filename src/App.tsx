@@ -4,6 +4,7 @@ import { SessionContextProvider, useSession } from "@supabase/auth-helpers-react
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
+import Login from "./pages/Login";
 import { MainNav } from "./components/MainNav";
 import { supabase } from "./lib/supabase";
 import "./App.css";
