@@ -1,20 +1,84 @@
+import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Flag } from "lucide-react";
+import { Flag, AlertTriangle } from "lucide-react";
+import { useSession } from "@supabase/auth-helpers-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
+import { useToast } from "@/components/ui/use-toast";
+import { useRealtimeSync } from "@/hooks/useRealtimeSync";
 
 interface Issue {
   id: number;
   title: string;
   priority: "low" | "medium" | "high";
+  description?: string;
+  owner_id: string;
+  meeting_id?: number;
 }
 
-export const IssuesDashboard = () => {
-  const issues: Issue[] = [
-    { id: 1, title: "System Performance", priority: "high" },
-    { id: 2, title: "Training Documentation", priority: "medium" },
-  ];
+export const IssuesDashboard = ({ meetingId }: { meetingId?: number }) => {
+  const session = useSession();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const [newTitle, setNewTitle] = useState("");
+  const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
+
+  // Enable real-time sync
+  useRealtimeSync();
+
+  const { data: issues, isLoading } = useQuery({
+    queryKey: ["issues", session?.user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("issues")
+        .select("*")
+        .or(`owner_id.eq.${session?.user?.id},user_id.eq.${session?.user?.id}`)
+        .order("priority", { ascending: false });
+      
+      if (error) throw error;
+      return data as Issue[];
+    },
+    enabled: !!session?.user?.id,
+  });
+
+  const addIssue = useMutation({
+    mutationFn: async (newIssue: Omit<Issue, "id">) => {
+      const { data, error } = await supabase
+        .from("issues")
+        .insert([newIssue])
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["issues"] });
+      toast({
+        title: "Success",
+        description: "Issue added successfully",
+      });
+      setNewTitle("");
+      setPriority("medium");
+    },
+  });
+
+  const handleAddIssue = () => {
+    if (!newTitle.trim()) return;
+    
+    addIssue.mutate({
+      title: newTitle,
+      priority,
+      owner_id: session?.user?.id || "",
+      meeting_id: meetingId,
+    });
+  };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <Card>
@@ -25,8 +89,16 @@ export const IssuesDashboard = () => {
       <CardContent>
         <div className="space-y-4">
           <div className="flex gap-2">
-            <Input placeholder="Add new issue..." className="flex-1" />
-            <Select defaultValue="medium">
+            <Input
+              placeholder="Add new issue..."
+              value={newTitle}
+              onChange={(e) => setNewTitle(e.target.value)}
+              className="flex-1"
+            />
+            <Select
+              value={priority}
+              onValueChange={(value: "low" | "medium" | "high") => setPriority(value)}
+            >
               <SelectTrigger className="w-[100px]">
                 <SelectValue />
               </SelectTrigger>
@@ -36,12 +108,17 @@ export const IssuesDashboard = () => {
                 <SelectItem value="high">High</SelectItem>
               </SelectContent>
             </Select>
-            <Button>Add</Button>
+            <Button onClick={handleAddIssue}>Add</Button>
           </div>
           <div className="space-y-2">
-            {issues.map((issue) => (
+            {issues?.map((issue) => (
               <div key={issue.id} className="flex items-center justify-between border-b pb-2">
-                <span>{issue.title}</span>
+                <div className="flex items-center gap-2">
+                  <span>{issue.title}</span>
+                  {issue.priority === "high" && (
+                    <AlertTriangle className="h-4 w-4 text-red-500" />
+                  )}
+                </div>
                 <span className={`text-sm ${
                   issue.priority === "high" 
                     ? "text-red-500" 

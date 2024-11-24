@@ -12,14 +12,18 @@ import { CalendarIcon } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useRocks, useUpdateRock, useAddRock } from "@/hooks/useDashboardData";
 import { useSession } from "@supabase/auth-helpers-react";
+import { useRealtimeSync } from "@/hooks/useRealtimeSync";
 
-export const RocksDashboard = () => {
+export const RocksDashboard = ({ meetingId }: { meetingId?: number }) => {
   const { data: rocks, isLoading } = useRocks();
   const updateRock = useUpdateRock();
   const addRock = useAddRock();
   const session = useSession();
   const [newRockTitle, setNewRockTitle] = useState("");
   const [dueDate, setDueDate] = useState<Date>();
+
+  // Enable real-time sync
+  useRealtimeSync();
 
   const handleAddRock = () => {
     if (!newRockTitle.trim()) return;
@@ -30,7 +34,7 @@ export const RocksDashboard = () => {
       progress: 0,
       owner_id: session?.user?.id || "",
       due_date: dueDate || new Date(),
-      meeting_id: null,
+      meeting_id: meetingId || null,
       user_id: session?.user?.id || "",
     });
     
@@ -45,6 +49,10 @@ export const RocksDashboard = () => {
   const handleProgressChange = (rockId: number, progress: number) => {
     updateRock.mutate({ id: rockId, progress });
   };
+
+  const filteredRocks = rocks?.filter(rock => 
+    rock.owner_id === session?.user?.id || rock.user_id === session?.user?.id
+  );
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -83,7 +91,7 @@ export const RocksDashboard = () => {
             <Button onClick={handleAddRock}>Add Rock</Button>
           </div>
 
-          {rocks?.map((rock) => (
+          {filteredRocks?.map((rock) => (
             <div key={rock.id} className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="font-medium">{rock.title}</span>

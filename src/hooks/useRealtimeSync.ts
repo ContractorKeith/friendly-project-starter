@@ -39,21 +39,10 @@ export const useRealtimeSync = () => {
       )
       .subscribe();
 
-    // Subscribe to scorecard changes
-    const scorecardSubscription = supabase
-      .channel('scorecard-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'scorecard' },
-        () => {
-          queryClient.invalidateQueries({ queryKey: ['scorecard', userId] });
-        }
-      )
-      .subscribe();
-
     return () => {
       todosSubscription.unsubscribe();
       rocksSubscription.unsubscribe();
       issuesSubscription.unsubscribe();
-      scorecardSubscription.unsubscribe();
     };
   }, [queryClient, userId]);
 };

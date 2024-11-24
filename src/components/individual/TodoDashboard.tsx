@@ -9,14 +9,18 @@ import { format } from "date-fns";
 import { Calendar as CalendarIcon, CheckSquare } from "lucide-react";
 import { useTodos, useUpdateTodo, useAddTodo } from "@/hooks/useDashboardData";
 import { useSession } from "@supabase/auth-helpers-react";
+import { useRealtimeSync } from "@/hooks/useRealtimeSync";
 
-export const TodoDashboard = () => {
+export const TodoDashboard = ({ meetingId }: { meetingId?: number }) => {
   const { data: todos, isLoading } = useTodos();
   const updateTodo = useUpdateTodo();
   const addTodo = useAddTodo();
   const session = useSession();
   const [newTodoTitle, setNewTodoTitle] = useState("");
   const [date, setDate] = useState<Date>();
+
+  // Enable real-time sync
+  useRealtimeSync();
 
   const handleAddTodo = () => {
     if (!newTodoTitle.trim()) return;
@@ -26,7 +30,7 @@ export const TodoDashboard = () => {
       status: "not_started",
       dueDate: date || new Date(),
       assigned_to: session?.user?.id || null,
-      meeting_id: null,
+      meeting_id: meetingId || null,
       user_id: session?.user?.id || null,
     });
     
@@ -37,6 +41,10 @@ export const TodoDashboard = () => {
   const handleStatusChange = (todoId: number, status: "not_started" | "in_progress" | "complete") => {
     updateTodo.mutate({ id: todoId, status });
   };
+
+  const filteredTodos = todos?.filter(todo => 
+    todo.assigned_to === session?.user?.id || todo.user_id === session?.user?.id
+  );
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -59,12 +67,12 @@ export const TodoDashboard = () => {
             <Button onClick={handleAddTodo}>Add Todo</Button>
           </div>
           
-          {todos?.map((todo) => (
+          {filteredTodos?.map((todo) => (
             <div key={todo.id} className="flex flex-col space-y-2 border-b pb-4">
               <div className="flex items-center justify-between">
                 <span className="font-medium">{todo.title}</span>
                 <Select 
-                  defaultValue={todo.status}
+                  value={todo.status}
                   onValueChange={(value: "not_started" | "in_progress" | "complete") => 
                     handleStatusChange(todo.id, value)
                   }
