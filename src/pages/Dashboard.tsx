@@ -1,18 +1,37 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useSession } from "@supabase/auth-helpers-react";
+import { useSession, useUser } from "@supabase/auth-helpers-react";
 import { TodoDashboard } from "@/components/individual/TodoDashboard";
 import { RocksDashboard } from "@/components/individual/RocksDashboard";
 import { ScorecardDashboard } from "@/components/individual/ScorecardDashboard";
 import { IssuesDashboard } from "@/components/individual/IssuesDashboard";
+import { UserManagement } from "@/components/UserManagement";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
 
 const Dashboard = () => {
   const session = useSession();
+  const user = useUser();
   const navigate = useNavigate();
+
+  const { data: profile } = useQuery({
+    queryKey: ["profile", user?.id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user?.id)
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!user?.id,
+  });
 
   useEffect(() => {
     if (!session) {
-      navigate("/login");
+      navigate("/");
     }
   }, [session, navigate]);
 
@@ -30,6 +49,7 @@ const Dashboard = () => {
           <RocksDashboard />
           <ScorecardDashboard />
           <IssuesDashboard />
+          {profile?.role === "admin" && <UserManagement />}
         </div>
       </div>
     </div>
