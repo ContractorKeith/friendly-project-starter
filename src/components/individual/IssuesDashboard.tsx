@@ -26,18 +26,21 @@ export const IssuesDashboard = ({ meetingId }: { meetingId?: number }) => {
   const [newTitle, setNewTitle] = useState("");
   const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
 
-  // Enable real-time sync
   useRealtimeSync();
 
   const { data: issues, isLoading } = useQuery({
     queryKey: ["issues", session?.user?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const query = supabase
         .from("issues")
         .select("*")
-        .or(`owner_id.eq.${session?.user?.id},user_id.eq.${session?.user?.id}`)
-        .order("priority", { ascending: false });
+        .eq("user_id", session?.user?.id);
       
+      if (meetingId) {
+        query.eq("meeting_id", meetingId);
+      }
+      
+      const { data, error } = await query;
       if (error) throw error;
       return data as Issue[];
     },
@@ -48,7 +51,7 @@ export const IssuesDashboard = ({ meetingId }: { meetingId?: number }) => {
     mutationFn: async (newIssue: Omit<Issue, "id">) => {
       const { data, error } = await supabase
         .from("issues")
-        .insert([newIssue])
+        .insert([{ ...newIssue, user_id: session?.user?.id }])
         .select()
         .single();
       if (error) throw error;

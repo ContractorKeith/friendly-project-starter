@@ -3,7 +3,6 @@ import { supabase } from "@/lib/supabase";
 import { toast } from "@/components/ui/use-toast";
 import { useSession } from "@supabase/auth-helpers-react";
 
-// Types
 export interface Todo {
   id: number;
   title: string;
@@ -38,31 +37,18 @@ export interface Metric {
   target: string;
 }
 
-// Fetch functions
-const fetchTodos = async (userId: string | undefined) => {
-  const { data, error } = await supabase
-    .from("todos")
-    .select("*")
-    .eq("assigned_to", userId);
-  if (error) throw error;
-  return data as Todo[];
-};
-
-const fetchRocks = async (userId: string | undefined) => {
-  const { data, error } = await supabase
-    .from("rocks")
-    .select("*")
-    .eq("user_id", userId);
-  if (error) throw error;
-  return data as Rock[];
-};
-
-// Query hooks
 export const useTodos = () => {
   const session = useSession();
   return useQuery({
     queryKey: ["todos", session?.user?.id],
-    queryFn: () => fetchTodos(session?.user?.id),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("todos")
+        .select("*")
+        .eq("user_id", session?.user?.id);
+      if (error) throw error;
+      return data as Todo[];
+    },
     enabled: !!session?.user?.id,
   });
 };
@@ -71,12 +57,18 @@ export const useRocks = () => {
   const session = useSession();
   return useQuery({
     queryKey: ["rocks", session?.user?.id],
-    queryFn: () => fetchRocks(session?.user?.id),
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("rocks")
+        .select("*")
+        .eq("user_id", session?.user?.id);
+      if (error) throw error;
+      return data as Rock[];
+    },
     enabled: !!session?.user?.id,
   });
 };
 
-// Mutation hooks
 export const useAddTodo = () => {
   const queryClient = useQueryClient();
   const session = useSession();
