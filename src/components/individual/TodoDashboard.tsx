@@ -8,11 +8,13 @@ import { Input } from "@/components/ui/input";
 import { format } from "date-fns";
 import { Calendar as CalendarIcon, CheckSquare } from "lucide-react";
 import { useTodos, useUpdateTodo, useAddTodo } from "@/hooks/useDashboardData";
+import { useSession } from "@supabase/auth-helpers-react";
 
 export const TodoDashboard = () => {
   const { data: todos, isLoading } = useTodos();
   const updateTodo = useUpdateTodo();
   const addTodo = useAddTodo();
+  const session = useSession();
   const [newTodoTitle, setNewTodoTitle] = useState("");
   const [date, setDate] = useState<Date>();
 
@@ -23,6 +25,9 @@ export const TodoDashboard = () => {
       title: newTodoTitle,
       status: "not_started",
       dueDate: date || new Date(),
+      assigned_to: session?.user?.id || null,
+      meeting_id: null,
+      user_id: session?.user?.id || null,
     });
     
     setNewTodoTitle("");
