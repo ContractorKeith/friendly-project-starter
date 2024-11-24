@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import Admin from "./pages/Admin";
+import ProfileSettings from "./pages/ProfileSettings";
 import { MainNav } from "./components/MainNav";
 import "./App.css";
 import { Toaster } from "@/components/ui/toaster";
@@ -18,6 +19,7 @@ function App() {
           <Route path="/" element={<Index />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/profile" element={<ProfileSettings />} />
         </Routes>
         <Toaster />
       </Router>
