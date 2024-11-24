@@ -23,12 +23,10 @@ const MEETING_SEGMENTS = [
 
 const Index = () => {
   const [meetingProgress, setMeetingProgress] = useState(0);
-
-  // Enable real-time sync
   useRealtimeSync();
 
   return (
-    <div className="min-h-screen p-6 bg-gray-50">
+    <div className="container mx-auto p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Level 10 Meeting</h1>
@@ -50,7 +48,6 @@ const Index = () => {
 
         <div className="grid gap-6 md:grid-cols-2">
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold">Meeting Dashboard</h2>
             <SegueInput />
             <ScorecardReview />
             <RockReview />
