@@ -58,20 +58,6 @@ export function MainNav() {
                 </NavigationMenuLink>
               </Link>
             </NavigationMenuItem>
-            <NavigationMenuItem>
-              <Link to="/todos">
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  ToDos
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
-            <NavigationMenuItem>
-              <Link to="/rocks">
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  Rocks
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
             {profile?.role === "admin" && (
               <NavigationMenuItem>
                 <Link to="/admin">
