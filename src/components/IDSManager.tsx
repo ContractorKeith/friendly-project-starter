@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { MessageSquare, AlertTriangle } from "lucide-react";
+import { MessageSquare, AlertTriangle, Calendar } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { useToast } from "@/components/ui/use-toast";
+import { format } from "date-fns";
 
 interface Issue {
   id: number;
@@ -19,6 +20,8 @@ interface Issue {
   status: boolean;
   owner_id: string;
   meeting_id: number | null;
+  due_date?: string;
+  owner?: { username: string };
 }
 
 interface IDSManagerProps {
@@ -34,13 +37,16 @@ export const IDSManager = ({ meetingId, onConvertToTodo }: IDSManagerProps) => {
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<"high" | "medium" | "low">("medium");
 
-  // Fetch issues
+  // Fetch issues with owner information
   const { data: issues, isLoading } = useQuery({
     queryKey: ["issues", meetingId],
     queryFn: async () => {
       const query = supabase
         .from("issues")
-        .select("*")
+        .select(`
+          *,
+          owner:profiles!issues_owner_id_fkey(username)
+        `)
         .order("priority", { ascending: false });
 
       if (meetingId) {
@@ -153,6 +159,17 @@ export const IDSManager = ({ meetingId, onConvertToTodo }: IDSManagerProps) => {
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground">{issue.description}</p>
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                    {issue.due_date && (
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {format(new Date(issue.due_date), 'MMM d, yyyy')}
+                      </div>
+                    )}
+                    {issue.owner && (
+                      <span>• Owner: {issue.owner.username}</span>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   {onConvertToTodo && (
