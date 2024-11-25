@@ -9,6 +9,48 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      archived_meetings: {
+        Row: {
+          cascading_messages: string | null
+          created_at: string | null
+          id: number
+          issues_data: Json | null
+          meeting_date: string
+          meeting_rating: number | null
+          revenue: number | null
+          rocks_data: Json | null
+          scorecard_data: Json | null
+          todos_data: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          cascading_messages?: string | null
+          created_at?: string | null
+          id?: number
+          issues_data?: Json | null
+          meeting_date: string
+          meeting_rating?: number | null
+          revenue?: number | null
+          rocks_data?: Json | null
+          scorecard_data?: Json | null
+          todos_data?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          cascading_messages?: string | null
+          created_at?: string | null
+          id?: number
+          issues_data?: Json | null
+          meeting_date?: string
+          meeting_rating?: number | null
+          revenue?: number | null
+          rocks_data?: Json | null
+          scorecard_data?: Json | null
+          todos_data?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       checklist_items: {
         Row: {
           checklist_id: number | null
@@ -70,6 +112,44 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      company_kpis: {
+        Row: {
+          created_at: string | null
+          id: number
+          meeting_id: number | null
+          name: string
+          target: string
+          updated_at: string | null
+          value: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          meeting_id?: number | null
+          name: string
+          target: string
+          updated_at?: string | null
+          value: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          meeting_id?: number | null
+          name?: string
+          target?: string
+          updated_at?: string | null
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_kpis_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "meetings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       issues: {
         Row: {

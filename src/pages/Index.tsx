@@ -9,6 +9,8 @@ import { Headlines } from "@/components/Headlines";
 import { TodoList } from "@/components/TodoList";
 import { IDSManager } from "@/components/IDSManager";
 import { MeetingConclusion } from "@/components/MeetingConclusion";
+import { CompanyKPIs } from "@/components/CompanyKPIs";
+import { RevenueChart } from "@/components/RevenueChart";
 import { useRealtimeSync } from "@/hooks/useRealtimeSync";
 import { useSession } from "@supabase/auth-helpers-react";
 import { useToast } from "@/components/ui/use-toast";
@@ -127,6 +129,10 @@ const Index = () => {
         </Card>
 
         <div className="space-y-8">
+          <div className="grid grid-cols-2 gap-8">
+            <CompanyKPIs />
+            <RevenueChart />
+          </div>
           <SegueInput />
           <ScorecardReview />
           <RockReview />
