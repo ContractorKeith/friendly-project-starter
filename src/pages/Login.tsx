@@ -27,12 +27,19 @@ const Login = () => {
       if (event === 'SIGNED_OUT') {
         navigate("/login");
       }
+      if (event === 'USER_ERROR') {
+        toast({
+          title: "Error",
+          description: "This email is already registered. Please sign in instead.",
+          variant: "destructive",
+        });
+      }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, [session, navigate]);
+  }, [session, navigate, toast]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -47,21 +54,6 @@ const Login = () => {
               appearance={{ theme: ThemeSupa }}
               theme="light"
               providers={[]}
-              onError={(error) => {
-                if (error.message.includes("User already registered")) {
-                  toast({
-                    title: "Account exists",
-                    description: "This email is already registered. Please sign in instead.",
-                    variant: "destructive",
-                  });
-                } else {
-                  toast({
-                    title: "Error",
-                    description: error.message,
-                    variant: "destructive",
-                  });
-                }
-              }}
             />
           </CardContent>
         </Card>
