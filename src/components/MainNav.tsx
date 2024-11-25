@@ -15,7 +15,7 @@ import { supabase } from "@/lib/supabase";
 import { Users, Settings, Archive, Timer, LayoutDashboard } from "lucide-react";
 
 export function MainNav() {
-  const { data: profile } = useQuery({
+  const { data: profile, isLoading } = useQuery({
     queryKey: ["profile"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -27,10 +27,17 @@ export function MainNav() {
         .eq("id", user.id)
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return null;
+      }
+      console.log("Profile data:", data); // Debug log
       return data;
     },
+    retry: 1,
   });
+
+  console.log("Current profile role:", profile?.role); // Debug log
 
   const isAdmin = profile?.role === "admin";
 
