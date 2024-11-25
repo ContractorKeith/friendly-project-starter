@@ -17,7 +17,7 @@ const Login = () => {
       navigate("/");
     }
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_IN') {
         navigate("/");
       }
@@ -27,7 +27,11 @@ const Login = () => {
       if (event === 'SIGNED_OUT') {
         navigate("/login");
       }
-      if (event === 'USER_ERROR') {
+    });
+
+    // Set up error handling separately
+    const authListener = supabase.auth.onError((error) => {
+      if (error.message.includes("User already registered")) {
         toast({
           title: "Error",
           description: "This email is already registered. Please sign in instead.",
@@ -38,6 +42,7 @@ const Login = () => {
 
     return () => {
       subscription.unsubscribe();
+      authListener.data.subscription.unsubscribe();
     };
   }, [session, navigate, toast]);
 
