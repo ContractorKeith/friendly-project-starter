@@ -64,6 +64,13 @@ export function MainNav() {
                     </NavigationMenuLink>
                   </Link>
                 </NavigationMenuItem>
+                <NavigationMenuItem>
+                  <Link to="/admin/archived">
+                    <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                      Archived Meetings
+                    </NavigationMenuLink>
+                  </Link>
+                </NavigationMenuItem>
               </>
             )}
             <NavigationMenuItem>
