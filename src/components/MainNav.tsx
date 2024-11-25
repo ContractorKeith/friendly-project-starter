@@ -7,7 +7,12 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import { 
+  Button,
+  buttonVariants
+} from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
+import { Users, Settings, Archive, Timer, LayoutDashboard } from "lucide-react";
 
 export function MainNav() {
   const { data: profile } = useQuery({
@@ -33,10 +38,11 @@ export function MainNav() {
     <div className="border-b">
       <div className="flex h-16 items-center px-4 container mx-auto">
         <NavigationMenu>
-          <NavigationMenuList>
+          <NavigationMenuList className="gap-2">
             <NavigationMenuItem>
               <Link to="/">
                 <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                  <Timer className="w-4 h-4 mr-2" />
                   Meeting Timer
                 </NavigationMenuLink>
               </Link>
@@ -44,6 +50,7 @@ export function MainNav() {
             <NavigationMenuItem>
               <Link to="/dashboard">
                 <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                  <LayoutDashboard className="w-4 h-4 mr-2" />
                   Dashboard
                 </NavigationMenuLink>
               </Link>
@@ -53,13 +60,15 @@ export function MainNav() {
                 <NavigationMenuItem>
                   <Link to="/admin">
                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                      Admin
+                      <Users className="w-4 h-4 mr-2" />
+                      User Management
                     </NavigationMenuLink>
                   </Link>
                 </NavigationMenuItem>
                 <NavigationMenuItem>
                   <Link to="/admin/settings">
                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                      <Settings className="w-4 h-4 mr-2" />
                       Org Settings
                     </NavigationMenuLink>
                   </Link>
@@ -67,6 +76,7 @@ export function MainNav() {
                 <NavigationMenuItem>
                   <Link to="/admin/archived">
                     <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                      <Archive className="w-4 h-4 mr-2" />
                       Archived Meetings
                     </NavigationMenuLink>
                   </Link>
@@ -75,9 +85,9 @@ export function MainNav() {
             )}
             <NavigationMenuItem>
               <Link to="/profile">
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  Profile
-                </NavigationMenuLink>
+                <Button variant="outline" size="sm">
+                  Profile Settings
+                </Button>
               </Link>
             </NavigationMenuItem>
           </NavigationMenuList>
