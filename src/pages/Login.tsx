@@ -64,14 +64,6 @@ const Login = () => {
               appearance={{ theme: ThemeSupa }}
               theme="light"
               providers={[]}
-              onError={(error) => {
-                console.error("Auth error:", error);
-                toast({
-                  title: "Error",
-                  description: error.message,
-                  variant: "destructive",
-                });
-              }}
             />
           </CardContent>
         </Card>
