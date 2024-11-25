@@ -23,7 +23,12 @@ const ProfileSettings = () => {
         .eq("id", session?.user?.id)
         .single();
       
-      if (error) throw error;
+      if (error) {
+        if (error.code === "PGRST116") {
+          return null;
+        }
+        throw error;
+      }
       return data;
     },
     enabled: !!session?.user?.id,
@@ -32,8 +37,8 @@ const ProfileSettings = () => {
   const updateProfile = useMutation({
     mutationFn: async (formData: FormData) => {
       const updates = {
-        full_name: formData.get("full_name"),
-        username: formData.get("username"),
+        full_name: formData.get("full_name")?.toString(),
+        username: formData.get("username")?.toString(),
       };
 
       const { error } = await supabase

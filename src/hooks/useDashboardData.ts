@@ -7,7 +7,7 @@ export interface Todo {
   id: number;
   title: string;
   status: "not_started" | "in_progress" | "complete";
-  dueDate: Date;
+  due_date: string | null;
   assigned_to: string | null;
   meeting_id: number | null;
   user_id: string | null;
@@ -16,25 +16,12 @@ export interface Todo {
 export interface Rock {
   id: number;
   title: string;
-  onTrack: boolean;
+  on_track: boolean;
   progress: number;
   owner_id: string;
-  due_date: Date | null;
+  due_date: string | null;
   meeting_id: number | null;
   user_id: string | null;
-}
-
-export interface Issue {
-  id: number;
-  title: string;
-  priority: "low" | "medium" | "high";
-}
-
-export interface Metric {
-  id: number;
-  name: string;
-  value: string;
-  target: string;
 }
 
 export const useTodos = () => {
@@ -98,10 +85,25 @@ export const useAddRock = () => {
   const session = useSession();
   
   return useMutation({
-    mutationFn: async (rock: Omit<Rock, "id">) => {
+    mutationFn: async (rock: { 
+      title: string;
+      owner_id: string;
+      due_date?: Date;
+      meeting_id?: number | null;
+      progress?: number;
+      on_track?: boolean;
+    }) => {
       const { data, error } = await supabase
         .from("rocks")
-        .insert([{ ...rock, user_id: session?.user?.id }])
+        .insert([{
+          title: rock.title,
+          owner_id: rock.owner_id,
+          due_date: rock.due_date?.toISOString(),
+          meeting_id: rock.meeting_id,
+          progress: rock.progress || 0,
+          on_track: rock.on_track || true,
+          user_id: session?.user?.id
+        }])
         .select()
         .single();
       if (error) throw error;
@@ -117,38 +119,25 @@ export const useAddRock = () => {
   });
 };
 
-// Update mutations
-export const useUpdateTodo = () => {
-  const queryClient = useQueryClient();
-  const session = useSession();
-  
-  return useMutation({
-    mutationFn: async (todo: Partial<Todo> & { id: number }) => {
-      const { error } = await supabase
-        .from("todos")
-        .update(todo)
-        .eq("id", todo.id);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["todos", session?.user?.id] });
-      toast({
-        title: "Success",
-        description: "Todo updated successfully",
-      });
-    },
-  });
-};
-
 export const useUpdateRock = () => {
   const queryClient = useQueryClient();
   const session = useSession();
   
   return useMutation({
-    mutationFn: async (rock: Partial<Rock> & { id: number }) => {
+    mutationFn: async (rock: { id: number } & Partial<{
+      title: string;
+      on_track: boolean;
+      progress: number;
+      due_date: Date;
+    }>) => {
+      const updateData: any = { ...rock };
+      if (rock.due_date) {
+        updateData.due_date = rock.due_date.toISOString();
+      }
+      
       const { error } = await supabase
         .from("rocks")
-        .update(rock)
+        .update(updateData)
         .eq("id", rock.id);
       if (error) throw error;
     },
