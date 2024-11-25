@@ -31,15 +31,18 @@ export function MainNav() {
         console.error("Error fetching profile:", error);
         return null;
       }
-      console.log("Profile data:", data); // Debug log
       return data;
     },
-    retry: 1,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    retry: 2,
+    retryDelay: 1000,
   });
 
-  console.log("Current profile role:", profile?.role); // Debug log
-
   const isAdmin = profile?.role === "admin";
+
+  if (isLoading) {
+    return null; // Or a loading spinner
+  }
 
   return (
     <div className="border-b">
