@@ -7,10 +7,7 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
-import { 
-  Button,
-  buttonVariants
-} from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { Users, Settings, Archive, Timer, LayoutDashboard } from "lucide-react";
 
@@ -21,21 +18,40 @@ export function MainNav() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
       
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-      
-      if (error) {
-        console.error("Error fetching profile:", error);
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+        
+        if (error) {
+          if (error.code === 'PGRST116') {
+            // Profile not found, create a new one
+            const { data: newProfile, error: createError } = await supabase
+              .from("profiles")
+              .insert([{
+                id: user.id,
+                username: user.email?.split('@')[0] || 'user',
+                role: 'team_member',
+                email: user.email
+              }])
+              .select()
+              .single();
+              
+            if (createError) throw createError;
+            return newProfile;
+          }
+          throw error;
+        }
+        return data;
+      } catch (error) {
+        console.error("Error handling profile:", error);
         return null;
       }
-      return data;
     },
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-    retry: 2,
-    retryDelay: 1000,
+    retry: 1, // Only retry once since we handle profile creation
   });
 
   const isAdmin = profile?.role === "admin";
