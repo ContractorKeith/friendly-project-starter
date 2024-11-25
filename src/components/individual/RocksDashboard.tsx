@@ -31,29 +31,24 @@ export const RocksDashboard = ({ meetingId }: { meetingId?: number }) => {
     
     addRock.mutate({
       title: newRockTitle,
-      onTrack: true,
+      on_track: true,
       progress: 0,
       owner_id: session?.user?.id || "",
-      due_date: dueDate || new Date(),
-      meeting_id: meetingId || null,
-      user_id: session?.user?.id || "",
+      due_date: dueDate,
+      meeting_id: meetingId,
     });
     
     setNewRockTitle("");
     setDueDate(undefined);
   };
 
-  const handleOnTrackChange = (rockId: number, onTrack: boolean) => {
-    updateRock.mutate({ id: rockId, onTrack });
+  const handleOnTrackChange = (rockId: number, on_track: boolean) => {
+    updateRock.mutate({ id: rockId, on_track });
   };
 
   const handleProgressChange = (rockId: number, progress: number) => {
     updateRock.mutate({ id: rockId, progress });
   };
-
-  const filteredRocks = rocks?.filter(rock => 
-    rock.owner_id === session?.user?.id || rock.user_id === session?.user?.id
-  );
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -92,7 +87,7 @@ export const RocksDashboard = ({ meetingId }: { meetingId?: number }) => {
             <Button onClick={handleAddRock}>Add Rock</Button>
           </div>
 
-          {filteredRocks?.map((rock) => (
+          {rocks?.map((rock) => (
             <div key={rock.id} className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="font-medium">{rock.title}</span>
@@ -104,7 +99,7 @@ export const RocksDashboard = ({ meetingId }: { meetingId?: number }) => {
                   <div className="flex items-center space-x-2">
                     <span className="text-sm text-muted-foreground">On Track</span>
                     <Switch 
-                      checked={rock.onTrack}
+                      checked={rock.on_track}
                       onCheckedChange={(checked) => handleOnTrackChange(rock.id, checked)}
                     />
                   </div>

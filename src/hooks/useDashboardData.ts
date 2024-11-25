@@ -80,6 +80,37 @@ export const useAddTodo = () => {
   });
 };
 
+export const useUpdateTodo = () => {
+  const queryClient = useQueryClient();
+  const session = useSession();
+  
+  return useMutation({
+    mutationFn: async (todo: { id: number } & Partial<{
+      title: string;
+      status: "not_started" | "in_progress" | "complete";
+      due_date: Date;
+    }>) => {
+      const updateData: any = { ...todo };
+      if (todo.due_date) {
+        updateData.due_date = todo.due_date.toISOString();
+      }
+      
+      const { error } = await supabase
+        .from("todos")
+        .update(updateData)
+        .eq("id", todo.id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["todos", session?.user?.id] });
+      toast({
+        title: "Success",
+        description: "Todo updated successfully",
+      });
+    },
+  });
+};
+
 export const useAddRock = () => {
   const queryClient = useQueryClient();
   const session = useSession();

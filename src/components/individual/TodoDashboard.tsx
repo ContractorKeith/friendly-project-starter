@@ -29,7 +29,7 @@ export const TodoDashboard = ({ meetingId }: { meetingId?: number }) => {
     addTodo.mutate({
       title: newTodoTitle,
       status: "not_started",
-      dueDate: date || new Date(),
+      due_date: date?.toISOString() || null,
       assigned_to: session?.user?.id || null,
       meeting_id: meetingId || null,
       user_id: session?.user?.id || null,
@@ -42,10 +42,6 @@ export const TodoDashboard = ({ meetingId }: { meetingId?: number }) => {
   const handleStatusChange = (todoId: number, status: "not_started" | "in_progress" | "complete") => {
     updateTodo.mutate({ id: todoId, status });
   };
-
-  const filteredTodos = todos?.filter(todo => 
-    todo.assigned_to === session?.user?.id || todo.user_id === session?.user?.id
-  );
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -68,7 +64,7 @@ export const TodoDashboard = ({ meetingId }: { meetingId?: number }) => {
             <Button onClick={handleAddTodo}>Add Todo</Button>
           </div>
           
-          {filteredTodos?.map((todo) => (
+          {todos?.map((todo) => (
             <div key={todo.id} className="flex flex-col space-y-2 border-b pb-4">
               <div className="flex items-center justify-between">
                 <span className="font-medium">{todo.title}</span>
@@ -96,7 +92,7 @@ export const TodoDashboard = ({ meetingId }: { meetingId?: number }) => {
                   <PopoverTrigger asChild>
                     <Button variant="outline" className="w-[140px] pl-3 text-left font-normal">
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {todo.dueDate ? format(new Date(todo.dueDate), "PPP") : "Pick a date"}
+                      {todo.due_date ? format(new Date(todo.due_date), "PPP") : "Pick a date"}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
