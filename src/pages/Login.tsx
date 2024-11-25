@@ -14,17 +14,23 @@ const Login = () => {
 
   useEffect(() => {
     if (session) {
+      console.log("Session exists, redirecting to home");
       navigate("/");
     }
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log("Auth state changed:", event, session?.user?.id);
+      
       if (event === 'SIGNED_IN') {
+        console.log("User signed in, redirecting to home");
         navigate("/");
       }
       if (event === 'USER_UPDATED') {
+        console.log("User updated, redirecting to home");
         navigate("/");
       }
       if (event === 'SIGNED_OUT') {
+        console.log("User signed out, redirecting to login");
         navigate("/login");
       }
       // Handle registration errors
@@ -58,6 +64,14 @@ const Login = () => {
               appearance={{ theme: ThemeSupa }}
               theme="light"
               providers={[]}
+              onError={(error) => {
+                console.error("Auth error:", error);
+                toast({
+                  title: "Error",
+                  description: error.message,
+                  variant: "destructive",
+                });
+              }}
             />
           </CardContent>
         </Card>
