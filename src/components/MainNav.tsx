@@ -27,6 +27,7 @@ export function MainNav() {
         
         if (error) {
           if (error.code === 'PGRST116') {
+            console.log("Profile not found, creating new profile for user:", user.id);
             // Profile not found, create a new one
             const { data: newProfile, error: createError } = await supabase
               .from("profiles")
@@ -39,11 +40,17 @@ export function MainNav() {
               .select()
               .single();
               
-            if (createError) throw createError;
+            if (createError) {
+              console.error("Error creating profile:", createError);
+              throw createError;
+            }
+            console.log("New profile created:", newProfile);
             return newProfile;
           }
+          console.error("Error fetching profile:", error);
           throw error;
         }
+        console.log("Existing profile found:", data);
         return data;
       } catch (error) {
         console.error("Error handling profile:", error);
@@ -55,6 +62,8 @@ export function MainNav() {
   });
 
   const isAdmin = profile?.role === "admin";
+  console.log("Profile data:", profile);
+  console.log("Is admin?", isAdmin);
 
   if (isLoading) {
     return null; // Or a loading spinner
