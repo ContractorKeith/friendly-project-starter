@@ -2,7 +2,7 @@ import { Auth } from "@supabase/auth-ui-react";
 import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
-import { useSession } from "@supabase/auth-helpers-react";
+import { useSession, AuthChangeEvent } from "@supabase/auth-helpers-react";
 import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
@@ -18,7 +18,7 @@ const Login = () => {
       navigate("/");
     }
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session) => {
       console.log("Auth state changed:", event, session?.user?.id);
       
       if (event === 'SIGNED_IN') {
@@ -39,12 +39,7 @@ const Login = () => {
           description: "Please check your email for password reset instructions.",
         });
       }
-      if (event === 'VERIFICATION_REQUIRED') {
-        toast({
-          title: "Email Verification Required",
-          description: "Please check your email to verify your account.",
-        });
-      }
+
       // Handle registration errors
       if (event === 'INITIAL_SESSION' && !session && window.location.hash.includes('error')) {
         const errorDescription = new URLSearchParams(window.location.hash.substring(1)).get('error_description');
