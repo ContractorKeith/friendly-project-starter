@@ -31,6 +31,10 @@ const Login = () => {
       }
       if (event === 'SIGNED_OUT') {
         console.log("User signed out, staying on login page");
+        toast({
+          title: "Signed Out",
+          description: "Please sign in to continue",
+        });
       }
       if (event === 'PASSWORD_RECOVERY') {
         toast({

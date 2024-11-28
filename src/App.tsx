@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import { MainNav } from "./components/MainNav";
 import "./App.css";
 import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/lib/supabase";
 
 const queryClient = new QueryClient({
@@ -23,16 +24,22 @@ const queryClient = new QueryClient({
   },
 });
 
-// Protected Route component with session check
+// Protected Route component with session check and feedback
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const session = useSession();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!session) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to access this page",
+        variant: "destructive",
+      });
       navigate("/login");
     }
-  }, [session, navigate]);
+  }, [session, navigate, toast]);
 
   if (!session) {
     return null;
@@ -43,6 +50,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   const session = useSession();
+  const { toast } = useToast();
 
   // Set up auth state listener
   useEffect(() => {
@@ -52,13 +60,23 @@ function App() {
       if (event === "SIGNED_OUT") {
         // Clear query cache on logout
         queryClient.clear();
+        toast({
+          title: "Signed Out",
+          description: "You have been successfully logged out",
+        });
+      }
+      if (event === "SIGNED_IN") {
+        toast({
+          title: "Welcome Back",
+          description: "You have successfully signed in",
+        });
       }
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [toast]);
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -116,6 +134,7 @@ function App() {
               </ProtectedRoute>
             }
           />
+          <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
         <Toaster />
       </Router>
