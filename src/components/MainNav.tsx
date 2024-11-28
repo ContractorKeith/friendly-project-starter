@@ -9,12 +9,25 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
-import { Users, Settings, Archive, Timer, LayoutDashboard } from "lucide-react";
+import { Users, Settings, Archive, Timer, LayoutDashboard, LogOut } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 export function MainNav() {
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  const handleLogout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to log out. Please try again.",
+        variant: "destructive",
+      });
+    } else {
+      navigate("/login");
+    }
+  };
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ["profile"],
@@ -57,7 +70,7 @@ export function MainNav() {
 
   return (
     <div className="border-b">
-      <div className="flex h-16 items-center px-4 container mx-auto">
+      <div className="flex h-16 items-center px-4 container mx-auto justify-between">
         <NavigationMenu>
           <NavigationMenuList className="gap-2">
             <NavigationMenuItem>
@@ -113,6 +126,15 @@ export function MainNav() {
             </NavigationMenuItem>
           </NavigationMenuList>
         </NavigationMenu>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          onClick={handleLogout}
+          className="gap-2"
+        >
+          <LogOut className="w-4 h-4" />
+          Logout
+        </Button>
       </div>
     </div>
   );
