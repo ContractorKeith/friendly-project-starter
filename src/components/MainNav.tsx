@@ -18,52 +18,52 @@ export function MainNav() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
       
-      try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .single();
-        
-        if (error) {
-          if (error.code === 'PGRST116') {
-            console.log("Profile not found, creating new profile for user:", user.id);
-            const { data: newProfile, error: createError } = await supabase
-              .from("profiles")
-              .insert([{
-                id: user.id,
-                username: user.email?.split('@')[0] || 'user',
-                role: 'team_member',
-                email: user.email,
-                email_verified: user.email_confirmed_at !== null
-              }])
-              .select()
-              .single();
-              
-            if (createError) {
-              console.error("Error creating profile:", createError);
-              throw createError;
-            }
-            console.log("New profile created:", newProfile);
-            return newProfile;
-          }
-          console.error("Error fetching profile:", error);
-          throw error;
-        }
-        console.log("Existing profile found:", data);
-        return data;
-      } catch (error) {
-        console.error("Error handling profile:", error);
-        return null;
+      // First try to get existing profile
+      const { data: existingProfile, error: fetchError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .maybeSingle();
+      
+      if (existingProfile) {
+        return existingProfile;
       }
+
+      // If no profile exists and there was a PGRST116 error, create one
+      if (fetchError && fetchError.code === 'PGRST116') {
+        const { data: newProfile, error: createError } = await supabase
+          .from("profiles")
+          .insert([{
+            id: user.id,
+            username: user.email?.split('@')[0] || 'user',
+            role: 'team_member',
+            email: user.email,
+            email_verified: user.email_confirmed_at !== null
+          }])
+          .select()
+          .single();
+          
+        if (createError) {
+          console.error("Error creating profile:", createError);
+          throw createError;
+        }
+        
+        return newProfile;
+      }
+
+      // If there was a different error, throw it
+      if (fetchError) {
+        console.error("Error fetching profile:", fetchError);
+        throw fetchError;
+      }
+
+      return null;
     },
+    retry: 1,
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
-    retry: 1, // Only retry once since we handle profile creation
   });
 
   const isAdmin = profile?.role === "admin";
-  console.log("Profile data:", profile);
-  console.log("Is admin?", isAdmin);
 
   if (isLoading) {
     return null; // Or a loading spinner
