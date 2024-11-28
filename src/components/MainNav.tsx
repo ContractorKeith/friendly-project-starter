@@ -28,14 +28,14 @@ export function MainNav() {
         if (error) {
           if (error.code === 'PGRST116') {
             console.log("Profile not found, creating new profile for user:", user.id);
-            // Profile not found, create a new one
             const { data: newProfile, error: createError } = await supabase
               .from("profiles")
               .insert([{
                 id: user.id,
                 username: user.email?.split('@')[0] || 'user',
                 role: 'team_member',
-                email: user.email
+                email: user.email,
+                email_verified: user.email_confirmed_at !== null
               }])
               .select()
               .single();

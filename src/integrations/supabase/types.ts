@@ -301,6 +301,7 @@ export type Database = {
           active: boolean | null
           created_at: string
           email: string | null
+          email_verified: boolean | null
           full_name: string | null
           id: string
           last_login: string | null
@@ -312,6 +313,7 @@ export type Database = {
           active?: boolean | null
           created_at?: string
           email?: string | null
+          email_verified?: boolean | null
           full_name?: string | null
           id: string
           last_login?: string | null
@@ -323,6 +325,7 @@ export type Database = {
           active?: boolean | null
           created_at?: string
           email?: string | null
+          email_verified?: boolean | null
           full_name?: string | null
           id?: string
           last_login?: string | null

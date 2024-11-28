@@ -18,7 +18,7 @@ const Login = () => {
       navigate("/");
     }
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, session?.user?.id);
       
       if (event === 'SIGNED_IN') {
@@ -33,6 +33,18 @@ const Login = () => {
         console.log("User signed out, redirecting to login");
         navigate("/login");
       }
+      if (event === 'PASSWORD_RECOVERY') {
+        toast({
+          title: "Password Recovery",
+          description: "Please check your email for password reset instructions.",
+        });
+      }
+      if (event === 'VERIFICATION_REQUIRED') {
+        toast({
+          title: "Email Verification Required",
+          description: "Please check your email to verify your account.",
+        });
+      }
       // Handle registration errors
       if (event === 'INITIAL_SESSION' && !session && window.location.hash.includes('error')) {
         const errorDescription = new URLSearchParams(window.location.hash.substring(1)).get('error_description');
@@ -45,6 +57,20 @@ const Login = () => {
         }
       }
     });
+
+    // Check for password reset or email verification in URL
+    const hash = window.location.hash;
+    if (hash.includes('type=recovery')) {
+      toast({
+        title: "Password Reset",
+        description: "Please enter your new password.",
+      });
+    } else if (hash.includes('type=signup')) {
+      toast({
+        title: "Email Verification",
+        description: "Thank you for verifying your email.",
+      });
+    }
 
     return () => {
       subscription.unsubscribe();
@@ -64,6 +90,9 @@ const Login = () => {
               appearance={{ theme: ThemeSupa }}
               theme="light"
               providers={[]}
+              redirectTo={`${window.location.origin}/auth/callback`}
+              showLinks={true}
+              view="sign_in"
             />
           </CardContent>
         </Card>
