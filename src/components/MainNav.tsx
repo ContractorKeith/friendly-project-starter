@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import {
   NavigationMenu,
@@ -10,46 +10,42 @@ import {
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { Users, Settings, Archive, Timer, LayoutDashboard } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 export function MainNav() {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
   const { data: profile, isLoading } = useQuery({
     queryKey: ["profile"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return null;
       
-      // First try to get existing profile
-      const { data: existingProfile } = await supabase
+      // Try to get existing profile with .single() to enforce single row
+      const { data: existingProfile, error: fetchError } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user.id)
-        .maybeSingle();
-      
-      if (existingProfile) {
-        return existingProfile;
-      }
-
-      // If no profile exists, create one
-      const { data: newProfile, error: createError } = await supabase
-        .from("profiles")
-        .insert([{
-          id: user.id,
-          username: user.email?.split('@')[0] || 'user',
-          role: 'team_member',
-          email: user.email,
-          email_verified: user.email_confirmed_at !== null
-        }])
-        .select()
         .single();
-        
-      if (createError) {
-        console.error("Error creating profile:", createError);
-        throw createError;
+      
+      if (fetchError) {
+        if (fetchError.code === 'PGRST116') {
+          // No profile found, show error and redirect to profile creation
+          toast({
+            title: "Profile Not Found",
+            description: "Please complete your profile setup.",
+            variant: "destructive",
+          });
+          navigate("/profile");
+          return null;
+        }
+        throw fetchError;
       }
       
-      return newProfile;
+      return existingProfile;
     },
-    retry: 1,
+    retry: false, // Don't retry on failure
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
