@@ -3,7 +3,6 @@ import { ThemeSupa } from "@supabase/auth-ui-shared";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useSession } from "@supabase/auth-helpers-react";
-import { AuthChangeEvent } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
@@ -19,7 +18,7 @@ const Login = () => {
       navigate("/");
     }
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log("Auth state changed:", event, session?.user?.id);
       
       if (event === 'SIGNED_IN') {
@@ -31,8 +30,7 @@ const Login = () => {
         navigate("/");
       }
       if (event === 'SIGNED_OUT') {
-        console.log("User signed out, redirecting to login");
-        navigate("/login");
+        console.log("User signed out, staying on login page");
       }
       if (event === 'PASSWORD_RECOVERY') {
         toast({
@@ -40,33 +38,7 @@ const Login = () => {
           description: "Please check your email for password reset instructions.",
         });
       }
-
-      // Handle registration errors
-      if (event === 'INITIAL_SESSION' && !session && window.location.hash.includes('error')) {
-        const errorDescription = new URLSearchParams(window.location.hash.substring(1)).get('error_description');
-        if (errorDescription?.includes('User already registered')) {
-          toast({
-            title: "Error",
-            description: "This email is already registered. Please sign in instead.",
-            variant: "destructive",
-          });
-        }
-      }
     });
-
-    // Check for password reset or email verification in URL
-    const hash = window.location.hash;
-    if (hash.includes('type=recovery')) {
-      toast({
-        title: "Password Reset",
-        description: "Please enter your new password.",
-      });
-    } else if (hash.includes('type=signup')) {
-      toast({
-        title: "Email Verification",
-        description: "Thank you for verifying your email.",
-      });
-    }
 
     return () => {
       subscription.unsubscribe();

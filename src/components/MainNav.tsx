@@ -11,10 +11,12 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import { Users, Settings, Archive, Timer, LayoutDashboard, LogOut } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { useSession } from "@supabase/auth-helpers-react";
 
 export function MainNav() {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const session = useSession();
 
   const handleLogout = async () => {
     try {
@@ -27,6 +29,7 @@ export function MainNav() {
           variant: "destructive",
         });
       } else {
+        console.log("Logged out successfully");
         navigate("/login");
       }
     } catch (error) {
@@ -39,24 +42,27 @@ export function MainNav() {
     }
   };
 
-  const { data: profile, isLoading, error } = useQuery({
-    queryKey: ["profile"],
+  const { data: profile, isLoading } = useQuery({
+    queryKey: ["profile", session?.user?.id],
     queryFn: async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        navigate("/login");
+      console.log("Fetching profile for user:", session?.user?.id);
+      
+      if (!session?.user) {
+        console.log("No session user, skipping profile fetch");
         return null;
       }
       
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
-        .eq("id", user.id)
+        .eq("id", session.user.id)
         .limit(1)
         .single();
       
       if (error) {
+        console.error("Profile fetch error:", error);
         if (error.code === "PGRST116") {
+          // Profile doesn't exist, redirect to profile setup
           toast({
             title: "Profile Setup Required",
             description: "Please complete your profile setup.",
@@ -68,8 +74,10 @@ export function MainNav() {
         throw error;
       }
       
+      console.log("Profile fetched successfully:", data);
       return data;
     },
+    enabled: !!session?.user?.id,
     retry: false,
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
@@ -77,7 +85,11 @@ export function MainNav() {
   const isAdmin = profile?.role === "admin";
 
   if (isLoading) {
-    return null; // Or a loading spinner
+    return null;
+  }
+
+  if (!session) {
+    return null;
   }
 
   return (
