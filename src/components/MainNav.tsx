@@ -42,39 +42,40 @@ export function MainNav() {
     }
   };
 
-  const { data: profile, isLoading } = useQuery({
+  const { data: profile, isLoading, error } = useQuery({
     queryKey: ["profile", session?.user?.id],
     queryFn: async () => {
-      console.log("Fetching profile for user:", session?.user?.id);
-      
       if (!session?.user) {
-        console.log("No session user, skipping profile fetch");
         return null;
       }
-      
+
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", session.user.id)
-        .limit(1)
         .single();
-      
+
       if (error) {
-        console.error("Profile fetch error:", error);
         if (error.code === "PGRST116") {
-          // Profile doesn't exist, redirect to profile setup
-          toast({
-            title: "Profile Setup Required",
-            description: "Please complete your profile setup.",
-            variant: "destructive",
-          });
-          navigate("/profile");
-          return null;
+          // Profile doesn't exist, create one
+          const { data: newProfile, error: createError } = await supabase
+            .from("profiles")
+            .insert([
+              {
+                id: session.user.id,
+                username: session.user.email?.split("@")[0] || "user",
+                role: "team_member",
+                email: session.user.email,
+              },
+            ])
+            .select()
+            .single();
+
+          if (createError) throw createError;
+          return newProfile;
         }
         throw error;
       }
-      
-      console.log("Profile fetched successfully:", data);
       return data;
     },
     enabled: !!session?.user?.id,
