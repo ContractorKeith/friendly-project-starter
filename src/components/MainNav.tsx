@@ -48,16 +48,15 @@ export function MainNav() {
         return null;
       }
       
-      try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("id", user.id)
-          .maybeSingle();
-        
-        if (error) throw error;
-        
-        if (!data) {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .limit(1)
+        .single();
+      
+      if (error) {
+        if (error.code === "PGRST116") {
           toast({
             title: "Profile Setup Required",
             description: "Please complete your profile setup.",
@@ -66,17 +65,10 @@ export function MainNav() {
           navigate("/profile");
           return null;
         }
-        
-        return data;
-      } catch (error) {
-        console.error("Profile fetch error:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load profile. Please try again.",
-          variant: "destructive",
-        });
-        return null;
+        throw error;
       }
+      
+      return data;
     },
     retry: false,
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
