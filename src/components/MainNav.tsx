@@ -27,7 +27,6 @@ export function MainNav() {
           variant: "destructive",
         });
       } else {
-        // Instead of clearSession, we'll use signOut which handles everything
         navigate("/login");
       }
     } catch (error) {
@@ -40,7 +39,7 @@ export function MainNav() {
     }
   };
 
-  const { data: profile, isLoading } = useQuery({
+  const { data: profile, isLoading, error } = useQuery({
     queryKey: ["profile"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -50,26 +49,25 @@ export function MainNav() {
       }
       
       try {
-        const { data: existingProfile, error } = await supabase
+        const { data, error } = await supabase
           .from("profiles")
           .select("*")
           .eq("id", user.id)
-          .single();
+          .maybeSingle();
         
-        if (error) {
-          if (error.code === "PGRST116") {
-            toast({
-              title: "Profile Setup Required",
-              description: "Please complete your profile setup.",
-              variant: "destructive",
-            });
-            navigate("/profile");
-            return null;
-          }
-          throw error;
+        if (error) throw error;
+        
+        if (!data) {
+          toast({
+            title: "Profile Setup Required",
+            description: "Please complete your profile setup.",
+            variant: "destructive",
+          });
+          navigate("/profile");
+          return null;
         }
         
-        return existingProfile;
+        return data;
       } catch (error) {
         console.error("Profile fetch error:", error);
         toast({
