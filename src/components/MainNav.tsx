@@ -19,7 +19,7 @@ export function MainNav() {
       if (!user) return null;
       
       // First try to get existing profile
-      const { data: existingProfile, error: fetchError } = await supabase
+      const { data: existingProfile } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", user.id)
@@ -29,35 +29,25 @@ export function MainNav() {
         return existingProfile;
       }
 
-      // If no profile exists and there was a PGRST116 error, create one
-      if (fetchError && fetchError.code === 'PGRST116') {
-        const { data: newProfile, error: createError } = await supabase
-          .from("profiles")
-          .insert([{
-            id: user.id,
-            username: user.email?.split('@')[0] || 'user',
-            role: 'team_member',
-            email: user.email,
-            email_verified: user.email_confirmed_at !== null
-          }])
-          .select()
-          .single();
-          
-        if (createError) {
-          console.error("Error creating profile:", createError);
-          throw createError;
-        }
+      // If no profile exists, create one
+      const { data: newProfile, error: createError } = await supabase
+        .from("profiles")
+        .insert([{
+          id: user.id,
+          username: user.email?.split('@')[0] || 'user',
+          role: 'team_member',
+          email: user.email,
+          email_verified: user.email_confirmed_at !== null
+        }])
+        .select()
+        .single();
         
-        return newProfile;
+      if (createError) {
+        console.error("Error creating profile:", createError);
+        throw createError;
       }
-
-      // If there was a different error, throw it
-      if (fetchError) {
-        console.error("Error fetching profile:", fetchError);
-        throw fetchError;
-      }
-
-      return null;
+      
+      return newProfile;
     },
     retry: 1,
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
