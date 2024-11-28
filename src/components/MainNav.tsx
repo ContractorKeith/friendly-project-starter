@@ -27,8 +27,7 @@ export function MainNav() {
           variant: "destructive",
         });
       } else {
-        // Clear any cached data
-        await supabase.auth.clearSession();
+        // Instead of clearSession, we'll use signOut which handles everything
         navigate("/login");
       }
     } catch (error) {
