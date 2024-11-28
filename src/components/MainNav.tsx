@@ -17,15 +17,27 @@ export function MainNav() {
   const { toast } = useToast();
 
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Logout error:", error);
+        toast({
+          title: "Error",
+          description: "Failed to log out. Please try again.",
+          variant: "destructive",
+        });
+      } else {
+        // Clear any cached data
+        await supabase.auth.clearSession();
+        navigate("/login");
+      }
+    } catch (error) {
+      console.error("Unexpected error during logout:", error);
       toast({
         title: "Error",
-        description: "Failed to log out. Please try again.",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
-    } else {
-      navigate("/login");
     }
   };
 
@@ -33,32 +45,43 @@ export function MainNav() {
     queryKey: ["profile"],
     queryFn: async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return null;
-      
-      // Try to get existing profile with .single() to enforce single row
-      const { data: existingProfile, error: fetchError } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", user.id)
-        .single();
-      
-      if (fetchError) {
-        if (fetchError.code === 'PGRST116') {
-          // No profile found, show error and redirect to profile creation
-          toast({
-            title: "Profile Not Found",
-            description: "Please complete your profile setup.",
-            variant: "destructive",
-          });
-          navigate("/profile");
-          return null;
-        }
-        throw fetchError;
+      if (!user) {
+        navigate("/login");
+        return null;
       }
       
-      return existingProfile;
+      try {
+        const { data: existingProfile, error } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", user.id)
+          .single();
+        
+        if (error) {
+          if (error.code === "PGRST116") {
+            toast({
+              title: "Profile Setup Required",
+              description: "Please complete your profile setup.",
+              variant: "destructive",
+            });
+            navigate("/profile");
+            return null;
+          }
+          throw error;
+        }
+        
+        return existingProfile;
+      } catch (error) {
+        console.error("Profile fetch error:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load profile. Please try again.",
+          variant: "destructive",
+        });
+        return null;
+      }
     },
-    retry: false, // Don't retry on failure
+    retry: false,
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 
